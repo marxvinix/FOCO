@@ -510,7 +510,7 @@ function resetApiKey(){
 async function callGemini(prompt, key){
   const k=key||apiKey;
   if(!k) throw new Error('sem chave');
-  const models=['gemini-2.0-flash','gemini-2.0-flash-lite','gemini-1.5-flash-latest'];
+  const models=['gemini-2.0-flash','gemini-2.0-flash-lite','gemini-2.5-flash-preview-05-20'];
   let lastErr='';
   for(const model of models){
     try{
@@ -531,7 +531,11 @@ async function callGemini(prompt, key){
       const data=await res.json();
       console.log(`Gemini [${model}] status:`, res.status, 'response:', JSON.stringify(data).substring(0,400));
       if(!res.ok){
-        lastErr=`${model} ${res.status}: ${data?.error?.message||'erro'}`;
+        const msg=data?.error?.message||'erro';
+        if(res.status===429){
+          throw new Error('Cota da API excedida. Crie uma nova chave em aistudio.google.com → Get API Key.');
+        }
+        lastErr=`${model} ${res.status}: ${msg}`;
         continue;
       }
       // check for blocked response
