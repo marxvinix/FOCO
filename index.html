@@ -511,57 +511,35 @@ async function callGemini(prompt, key) {
   const k = key || apiKey;
   if (!k) throw new Error('sem chave');
 
-  // Usando o modelo mais estável e a versão estável da API (v1)
+  // Modelo fixo e estável para evitar erros de busca (404)
   const model = 'gemini-1.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${k}`;
+  // Endpoint v1beta que é o mais compatível com chaves novas
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${k}`;
 
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { 
-          temperature: 0.7, 
-          maxOutputTokens: 1500 
-        }
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error("Erro detalhado da API:", data);
-      // Se der erro de modelo não encontrado mesmo no v1, tentamos o v1beta como última alternativa
-      if (res.status === 404) {
-        return await callGeminiFallback(prompt, k);
-      }
-      throw new Error(data?.error?.message || `Erro ${res.status}`);
-    }
-
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!text) throw new Error('A IA retornou uma resposta vazia.');
-    return text;
-
-  } catch (e) {
-    console.error("Falha na chamada principal:", e);
-    throw e;
-  }
-}
-
-// Função de reserva caso a primeira falhe (usa v1beta)
-async function callGeminiFallback(prompt, k) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }]
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 1500 }
     })
   });
+
   const data = await res.json();
-  if (!res.ok) throw new Error(data?.error?.message || "Erro Crítico");
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+  if (!res.ok) {
+    if (res.status === 429) {
+      throw new Error("Muitas tentativas (Erro 429). Aguarde 1 a 2 minutos sem clicar em nada e tente de novo.");
+    }
+    if (res.status === 404) {
+      throw new Error("Modelo não encontrado (Erro 404). Verifique se sua chave API foi criada no 'Google AI Studio'.");
+    }
+    throw new Error(data?.error?.message || "Erro na API");
+  }
+
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  if (!text) throw new Error('A IA não retornou texto.');
+  return text;
 }
 
 // ==================== TOAST ====================
