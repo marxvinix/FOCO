@@ -45,16 +45,12 @@ input:focus{border-color:var(--accent)}
 </head>
 <body>
 
-<!-- SETUP SCREEN -->
 <div id="setup-screen">
   <div class="setup-box">
     <div class="setup-logo">fo<span>.</span>co</div>
-    <p style="color:var(--text-soft);margin-bottom:20px">Insira sua chave API do Google Gemini:</p>
+    <p style="color:var(--text-soft);margin-bottom:20px">Insira sua chave API do Gemini:</p>
     <input type="password" id="setup-key" placeholder="AIzaSy...">
     <button class="btn btn-primary" onclick="saveApiKey()">Entrar no app</button>
-    <p style="font-size:11px;color:var(--text-muted);margin-top:15px;text-align:center">
-        Se o app não funcionar, verifique se seu país tem acesso ao Gemini ou se há extensões bloqueando a conexão.
-    </p>
   </div>
 </div>
 
@@ -69,7 +65,7 @@ input:focus{border-color:var(--accent)}
   <div class="page active" id="page-tarefas">
     <h2>Tarefas</h2>
     <div class="card" style="margin-top:20px">
-      <textarea id="task-input" placeholder="O que você precisa fazer? (Pode escrever tudo misturado)" rows="4"></textarea>
+      <textarea id="task-input" placeholder="O que você precisa fazer?" rows="4"></textarea>
       <button class="btn btn-primary" id="ai-btn" onclick="addTask()">Organizar com IA</button>
     </div>
     <div id="task-list"></div>
@@ -87,7 +83,6 @@ input:focus{border-color:var(--accent)}
 let tasks = JSON.parse(localStorage.getItem('foco_tasks')) || [];
 let apiKey = localStorage.getItem('foco_key') || '';
 
-// Inicialização
 if(apiKey) document.getElementById('setup-screen').style.display = 'none';
 renderTasks();
 
@@ -97,7 +92,7 @@ function saveApiKey() {
     localStorage.setItem('foco_key', key);
     apiKey = key;
     document.getElementById('setup-screen').style.display = 'none';
-    showToast("Chave salva! Tentando conexão...", "green");
+    location.reload(); 
 }
 
 function resetKey() {
@@ -106,33 +101,39 @@ function resetKey() {
 }
 
 async function callGemini(prompt) {
-    // Usando v1 estável e modelo flash
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
-        });
+    // TENTATIVA 1: v1beta com gemini-1.5-flash (Mais provável de funcionar)
+    // TENTATIVA 2: v1beta com gemini-pro (Reserva clássica)
+    const models = ['gemini-1.5-flash', 'gemini-pro', 'gemini-1.5-flash-latest'];
+    let lastError = "";
 
-        const data = await response.json();
+    for (let modelName of models) {
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
 
-        if (!response.ok) {
-            // ERRO DETALHADO PARA DEBUG
-            const errorMsg = data.error?.message || "Erro desconhecido";
-            const errorCode = data.error?.status || response.status;
-            alert(`ERRO DA API (${errorCode}): ${errorMsg}`);
-            throw new Error(errorMsg);
+            const data = await response.json();
+
+            if (response.ok) {
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                lastError = data.error?.message || "Erro desconhecido";
+                console.warn(`Tentativa com ${modelName} falhou: ${lastError}`);
+                // Se o erro não for 404, não adianta tentar outros modelos (ex: erro de chave)
+                if (response.status !== 404) break;
+            }
+        } catch (e) {
+            lastError = e.message;
         }
-
-        return data.candidates[0].content.parts[0].text;
-    } catch (e) {
-        console.error(e);
-        throw e;
     }
+
+    alert(`ERRO CRÍTICO: ${lastError}\n\nSugestão: Verifique se sua chave API está correta e se o projeto no AI Studio tem a 'Generative Language API' ativada.`);
+    throw new Error(lastError);
 }
 
 async function addTask() {
@@ -142,10 +143,10 @@ async function addTask() {
     if(!text) return;
 
     btn.disabled = true;
-    btn.textContent = "Processando...";
+    btn.textContent = "IA está pensando...";
 
-    const prompt = `Atue como assistente para TDAH. Transforme o texto abaixo em uma lista de tarefas JSON. 
-    Responda APENAS o JSON puro, sem markdown, no formato: {"tarefas": [{"nome": "...", "prioridade": "alta|media|baixa"}]}
+    const prompt = `Atue como assistente para TDAH. Liste as tarefas abaixo em JSON. 
+    Responda APENAS JSON puro: {"tarefas": [{"nome": "...", "prioridade": "alta|media|baixa"}]}
     Texto: "${text}"`;
 
     try {
@@ -160,9 +161,9 @@ async function addTask() {
         saveTasks();
         renderTasks();
         input.value = "";
-        showToast("IA organizou suas tarefas!", "green");
+        showToast("Sucesso!", "green");
     } catch (e) {
-        showToast("Falha na IA. Verifique a chave ou sua internet.", "red");
+        showToast("Erro na IA", "red");
     } finally {
         btn.disabled = false;
         btn.textContent = "Organizar com IA";
@@ -208,6 +209,7 @@ function showToast(msg, color) {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.style.display = 'block';
+    t.style.backgroundColor = '#1A1A1A';
     t.style.borderLeft = `4px solid var(--${color})`;
     setTimeout(() => t.style.display = 'none', 3000);
 }
