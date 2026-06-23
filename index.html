@@ -5,14 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>fo.co - TDAH Productivity</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0F0F0F;--surface:#1A1A1A;--surface2:#222;--border:#2E2E2E;--border-light:#383838;
+  --bg:#0F0F0F;--surface:#1A1A1A;--surface2:#222;--border:#2E2E2E;
   --text:#EFEFEF;--text-soft:#999;--text-muted:#555;
   --accent:#C8B47A;--accent-dim:#3A3020;--accent-hover:#D9C98E;
   --green:#4CAF7D;--green-dim:#1A2E22;--red:#E05252;--red-dim:#2E1A1A;
-  --blue:#5B8DEF;--blue-dim:#1A2040;--purple:#A47EE0;--purple-dim:#231A38;
   --r:8px;--r-sm:5px;
 }
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
@@ -20,76 +19,28 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 /* SETUP SCREEN */
 #setup-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
 .setup-box{max-width:480px;width:100%}
-.setup-logo{font-size:28px;font-weight:600;letter-spacing:-1px;margin-bottom:8px}
+.setup-logo{font-size:28px;font-weight:600;margin-bottom:8px}
 .setup-logo span{color:var(--accent)}
-.setup-sub{color:var(--text-muted);font-size:14px;margin-bottom:32px;line-height:1.6}
-.setup-step{margin-bottom:24px}
-.setup-step-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
-.setup-step-text{font-size:13px;color:var(--text-soft);line-height:1.7;margin-bottom:12px}
-.setup-link{color:var(--accent);text-decoration:none}
-.setup-link:hover{text-decoration:underline}
-.setup-key-input{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.3px}
+input,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;color:var(--text);font-family:inherit;margin-bottom:12px;outline:none}
+input:focus{border-color:var(--accent)}
+.btn{padding:12px 18px;border:none;border-radius:var(--r-sm);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:0.2s;width:100%}
+.btn-primary{background:var(--accent);color:#0F0F0F}
+.btn-primary:hover{background:var(--accent-hover)}
 
-/* SIDEBAR */
-.sidebar{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;position:fixed;top:0;bottom:64px;left:0;overflow-y:auto}
-.logo{padding:0 20px 24px;font-size:18px;font-weight:600;letter-spacing:-0.5px;border-bottom:1px solid var(--border);margin-bottom:8px}
-.logo span{color:var(--accent)}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-soft);transition:all .15s;border-left:2px solid transparent}
-.nav-item:hover{color:var(--text);background:var(--surface2)}
-.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim)}
-.nav-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
-.api-status{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;cursor:pointer}
-.api-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
-
-/* MAIN */
-.main{margin-left:200px;padding:32px 32px 100px;max-width:940px}
+/* LAYOUT */
+.sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0}
+.nav-item{padding:12px 20px;cursor:pointer;color:var(--text-soft);font-weight:500}
+.nav-item.active{color:var(--accent);background:var(--accent-dim);border-left:3px solid var(--accent)}
+.main{margin-left:200px;padding:32px;max-width:900px}
 .page{display:none}.page.active{display:block}
-.page-title{font-size:22px;font-weight:600;letter-spacing:-0.5px;margin-bottom:4px}
-.page-sub{color:var(--text-muted);font-size:13px;margin-bottom:28px}
-
-/* CARDS & ELEMENTS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
-.card-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
-input,textarea,select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:14px;outline:none}
-input:focus,textarea:focus{border-color:var(--accent)}
-label{font-size:12px;font-weight:500;color:var(--text-soft);display:block;margin-bottom:6px}
-.btn{padding:9px 18px;border:none;border-radius:var(--r-sm);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
-.btn-primary{background:var(--accent);color:#0F0F0F}.btn-primary:hover{background:var(--accent-hover)}
-.btn-ghost{background:transparent;color:var(--text-soft);border:1px solid var(--border)}
-.btn-danger{background:transparent;color:var(--red);border:1px solid #3A2020;font-size:12px;padding:6px 10px}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-
-/* TASKS */
-.task-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);margin-bottom:8px}
-.task-check{width:18px;height:18px;border:1.5px solid var(--border-light);border-radius:50%;cursor:pointer;flex-shrink:0;margin-top:3px;display:flex;align-items:center;justify-content:center}
-.task-check.checked{background:var(--green);border-color:var(--green)}
-.task-check.checked::after{content:'✓';color:#0F0F0F;font-size:10px;font-weight:700}
-.task-name{font-size:14px}
-.tag{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600;text-transform:uppercase;margin-top:4px}
-.tag-alta{background:var(--red-dim);color:var(--red)}
-.tag-media{background:#2A2510;color:#C8A84A}
-.tag-baixa{background:var(--green-dim);color:var(--green)}
-
-/* CHAT AREA */
-.day-chat{display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto;margin-bottom:14px}
-.chat-msg{max-width:85%;padding:10px 14px;border-radius:12px;font-size:13px}
-.chat-msg.user{background:var(--surface2);align-self:flex-end;border-bottom-right-radius:2px}
-.chat-msg.ai{background:var(--accent-dim);color:var(--accent);align-self:flex-start;border-bottom-left-radius:2px}
-
-/* QUICK BAR */
-.quick-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:10px 20px;display:flex;gap:8px;z-index:100}
-.quick-bar input{flex:1}
+.task-item{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border)}
+.tag{font-size:10px;padding:2px 6px;border-radius:3px;background:var(--surface2);text-transform:uppercase}
 
 /* TOAST */
-.toast{position:fixed;top:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 18px;font-size:13px;z-index:999;opacity:0;transition:0.3s;pointer-events:none}
-.toast.show{opacity:1;transform:translateY(10px)}
-.toast-green{border-left:4px solid var(--green)}
-.toast-red{border-left:4px solid var(--red)}
+#toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);z-index:1000;display:none}
 
-@media(max-width:700px){
-  .sidebar{display:none}
-  .main{margin-left:0;padding-bottom:120px}
-}
+@media(max-width:700px){.sidebar{display:none}.main{margin-left:0}}
 </style>
 </head>
 <body>
@@ -98,324 +49,168 @@ label{font-size:12px;font-weight:500;color:var(--text-soft);display:block;margin
 <div id="setup-screen">
   <div class="setup-box">
     <div class="setup-logo">fo<span>.</span>co</div>
-    <div class="setup-sub">Para funcionar, cole sua chave de API do Gemini (obtida no Google AI Studio).</div>
-    <div class="field" style="margin-bottom: 20px;">
-      <label>Sua chave API</label>
-      <input type="password" id="setup-key" class="setup-key-input" placeholder="AIzaSy...">
-    </div>
-    <button class="btn btn-primary" style="width:100%;padding:12px" onclick="saveApiKey()">Entrar no app</button>
-    <div id="setup-error" style="color:var(--red);font-size:13px;margin-top:10px;display:none"></div>
-    <div class="setup-step-text" style="margin-top:20px; font-size:12px">
-        Dica: Se der erro 404, crie uma <b>nova chave</b> em um <b>novo projeto</b> no AI Studio.
-    </div>
+    <p style="color:var(--text-soft);margin-bottom:20px">Insira sua chave API do Google Gemini:</p>
+    <input type="password" id="setup-key" placeholder="AIzaSy...">
+    <button class="btn btn-primary" onclick="saveApiKey()">Entrar no app</button>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:15px;text-align:center">
+        Se o app não funcionar, verifique se seu país tem acesso ao Gemini ou se há extensões bloqueando a conexão.
+    </p>
   </div>
 </div>
 
-<!-- SIDEBAR -->
 <nav class="sidebar">
-  <div class="logo">fo<span>.</span>co</div>
+  <div style="padding:0 20px 20px;font-size:18px;font-weight:700">fo<span>.</span>co</div>
   <div class="nav-item active" onclick="showPage('tarefas',this)">Tarefas</div>
   <div class="nav-item" onclick="showPage('agenda',this)">Agenda</div>
-  <div class="nav-item" onclick="showPage('pausas',this)">Pausas</div>
-  <div class="nav-item" onclick="showPage('progresso',this)">Progresso</div>
-  <div class="nav-item" onclick="showPage('diario',this)">Diário</div>
-  <div class="nav-bottom">
-    <div class="api-status" onclick="resetApiKey()">
-      <div class="api-dot"></div>
-      <span>Gemini Conectado (Trocar)</span>
-    </div>
-  </div>
+  <div style="margin-top:auto;padding:20px;font-size:10px;color:var(--text-muted);cursor:pointer" onclick="resetKey()">Trocar Chave API</div>
 </nav>
 
 <div class="main">
-  <!-- TAREFAS -->
   <div class="page active" id="page-tarefas">
-    <div class="page-title">Tarefas</div>
-    <div class="page-sub">O que está na sua cabeça? A IA organiza para você.</div>
-    <div class="card">
-      <textarea id="task-free" placeholder="Ex: Preciso entregar o capítulo 1 do TCC até sexta, marcar dentista e estudar concreto armado..."></textarea>
-      <div class="btn-row" style="margin-top:10px">
-        <button class="btn btn-primary" id="btn-add-task" onclick="addTask()">Organizar com IA</button>
-      </div>
+    <h2>Tarefas</h2>
+    <div class="card" style="margin-top:20px">
+      <textarea id="task-input" placeholder="O que você precisa fazer? (Pode escrever tudo misturado)" rows="4"></textarea>
+      <button class="btn btn-primary" id="ai-btn" onclick="addTask()">Organizar com IA</button>
     </div>
-    <div id="task-list-container"></div>
+    <div id="task-list"></div>
   </div>
 
-  <!-- AGENDA -->
   <div class="page" id="page-agenda">
-    <div class="page-title">Agenda</div>
-    <div class="page-sub">Seu plano diário realista.</div>
-    <button class="btn btn-primary" style="margin-bottom:20px" onclick="gerarAgendaHoje()">Gerar plano para hoje</button>
-    <div id="agenda-container"></div>
-  </div>
-
-  <!-- PAUSAS -->
-  <div class="page" id="page-pausas">
-    <div class="page-title">Pausas e Recompensas</div>
-    <div class="page-sub">Desabafe ou peça uma sugestão de descanso.</div>
-    <div class="card">
-      <div class="day-chat" id="day-chat"></div>
-      <div style="display:flex;gap:8px">
-        <input id="chat-input" placeholder="Como você está se sentindo?" onkeydown="if(event.key==='Enter')sendChat()">
-        <button class="btn btn-primary" onclick="sendChat()">Enviar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PROGRESSO -->
-  <div class="page" id="page-progresso">
-    <div class="page-title">Progresso</div>
-    <div id="progress-content" class="card">Nenhum dado ainda.</div>
-  </div>
-
-  <!-- DIÁRIO -->
-  <div class="page" id="page-diario">
-    <div class="page-title">Diário Evolutivo</div>
-    <div id="diary-container"></div>
+    <h2>Agenda</h2>
+    <div id="agenda-list" style="margin-top:20px"></div>
   </div>
 </div>
 
-<!-- QUICK BAR -->
-<div class="quick-bar">
-  <input id="quick-input" placeholder="Adicionar algo rápido..." onkeydown="if(event.key==='Enter')processQuickInput()">
-  <button class="btn btn-primary" onclick="processQuickInput()">Enviar</button>
-</div>
-
-<div class="toast" id="toast"></div>
+<div id="toast"></div>
 
 <script>
-// ==================== ESTADO E CONFIG ====================
-let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-let agenda = JSON.parse(localStorage.getItem('agenda')) || [];
-let diary = JSON.parse(localStorage.getItem('diary')) || [];
-let chatHistory = [];
-let apiKey = localStorage.getItem('gemini_key') || '';
+let tasks = JSON.parse(localStorage.getItem('foco_tasks')) || [];
+let apiKey = localStorage.getItem('foco_key') || '';
 
-// ==================== API GEMINI (CORRIGIDA) ====================
-async function callGemini(prompt) {
-  if (!apiKey) throw new Error('Sem chave de API');
-  
-  const model = 'gemini-1.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
+// Inicialização
+if(apiKey) document.getElementById('setup-screen').style.display = 'none';
+renderTasks();
 
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
-      })
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-        if(res.status === 404) throw new Error("Erro 404: Modelo não encontrado. Verifique sua chave.");
-        if(res.status === 429) throw new Error("Erro 429: Limite de uso atingido. Aguarde um minuto.");
-        throw new Error(data.error?.message || "Erro na API");
-    }
-
-    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    // Limpar markdown de JSON se a IA enviar
-    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    return text;
-  } catch (e) {
-    console.error(e);
-    toast(e.message, 'red');
-    throw e;
-  }
-}
-
-// ==================== SETUP E NAVEGAÇÃO ====================
-function checkAuth() {
-  if (apiKey) document.getElementById('setup-screen').style.display = 'none';
-}
-
-async function saveApiKey() {
-  const key = document.getElementById('setup-key').value.trim();
-  if (!key) return;
-  
-  // Teste de validação
-  try {
-    const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash?key=${key}`;
-    const res = await fetch(testUrl);
-    if (!res.ok) throw new Error();
-    
+function saveApiKey() {
+    const key = document.getElementById('setup-key').value.trim();
+    if(!key) return alert("Por favor, insira a chave.");
+    localStorage.setItem('foco_key', key);
     apiKey = key;
-    localStorage.setItem('gemini_key', key);
     document.getElementById('setup-screen').style.display = 'none';
-    toast('Conectado!', 'green');
-  } catch (e) {
-    document.getElementById('setup-error').textContent = "Chave inválida ou erro 404. Tente criar uma nova chave no AI Studio.";
-    document.getElementById('setup-error').style.display = "block";
-  }
+    showToast("Chave salva! Tentando conexão...", "green");
 }
 
-function resetApiKey() {
-  localStorage.removeItem('gemini_key');
-  location.reload();
+function resetKey() {
+    localStorage.removeItem('foco_key');
+    location.reload();
 }
 
-function showPage(name, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  if(el) el.classList.add('active');
-  if(name === 'tarefas') renderTasks();
-  if(name === 'agenda') renderAgenda();
-  if(name === 'diario') renderDiary();
-  if(name === 'progresso') renderProgress();
+async function callGemini(prompt) {
+    // Usando v1 estável e modelo flash
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // ERRO DETALHADO PARA DEBUG
+            const errorMsg = data.error?.message || "Erro desconhecido";
+            const errorCode = data.error?.status || response.status;
+            alert(`ERRO DA API (${errorCode}): ${errorMsg}`);
+            throw new Error(errorMsg);
+        }
+
+        return data.candidates[0].content.parts[0].text;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
 }
 
-// ==================== TAREFAS ====================
 async function addTask() {
-  const text = document.getElementById('task-free').value.trim();
-  if (!text) return;
-  
-  const btn = document.getElementById('btn-add-task');
-  btn.disabled = true; btn.textContent = "IA processando...";
+    const input = document.getElementById('task-input');
+    const btn = document.getElementById('ai-btn');
+    const text = input.value.trim();
+    if(!text) return;
 
-  const prompt = `Você é um assistente para TDAH. Transforme este texto em uma lista de tarefas JSON. 
-  Texto: "${text}". 
-  Responda APENAS o JSON no formato: {"tarefas": [{"nome": "...", "prioridade": "alta|media|baixa", "nota": "..."}]}`;
+    btn.disabled = true;
+    btn.textContent = "Processando...";
 
-  try {
-    const res = await callGemini(prompt);
-    const data = JSON.parse(res);
-    data.tarefas.forEach(t => {
-      tasks.unshift({ id: Date.now() + Math.random(), ...t, done: false });
-    });
-    saveTasks();
-    renderTasks();
-    document.getElementById('task-free').value = "";
-    toast("Tarefas organizadas!", "green");
-  } catch (e) {}
-  btn.disabled = false; btn.textContent = "Organizar com IA";
+    const prompt = `Atue como assistente para TDAH. Transforme o texto abaixo em uma lista de tarefas JSON. 
+    Responda APENAS o JSON puro, sem markdown, no formato: {"tarefas": [{"nome": "...", "prioridade": "alta|media|baixa"}]}
+    Texto: "${text}"`;
+
+    try {
+        const result = await callGemini(prompt);
+        const cleanJson = result.replace(/```json/g, '').replace(/```/g, '').trim();
+        const data = JSON.parse(cleanJson);
+        
+        data.tarefas.forEach(t => {
+            tasks.unshift({id: Date.now() + Math.random(), nome: t.nome, prioridade: t.prioridade, done: false});
+        });
+        
+        saveTasks();
+        renderTasks();
+        input.value = "";
+        showToast("IA organizou suas tarefas!", "green");
+    } catch (e) {
+        showToast("Falha na IA. Verifique a chave ou sua internet.", "red");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Organizar com IA";
+    }
 }
-
-function toggleTask(id) {
-  const t = tasks.find(x => x.id === id);
-  if(t) t.done = !t.done;
-  saveTasks();
-  renderTasks();
-}
-
-function deleteTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
-  saveTasks();
-  renderTasks();
-}
-
-function saveTasks() { localStorage.setItem('tasks', JSON.stringify(tasks)); }
 
 function renderTasks() {
-  const container = document.getElementById('task-list-container');
-  container.innerHTML = tasks.map(t => `
-    <div class="task-item">
-      <div class="task-check ${t.done ? 'checked' : ''}" onclick="toggleTask(${t.id})"></div>
-      <div style="flex:1">
-        <div class="task-name" style="${t.done ? 'text-decoration:line-through;opacity:0.5' : ''}">${t.nome}</div>
-        <span class="tag tag-${t.prioridade}">${t.prioridade}</span>
-        ${t.nota ? `<div style="font-size:11px;color:var(--text-muted)">${t.nota}</div>` : ''}
-      </div>
-      <button class="btn-danger" onclick="deleteTask(${t.id})">Apagar</button>
-    </div>
-  `).join('');
-}
-
-// ==================== AGENDA ====================
-async function gerarAgendaHoje() {
-  const pending = tasks.filter(t => !t.done).map(t => t.nome).join(', ');
-  if (!pending) return toast("Sem tarefas pendentes!", "accent");
-
-  const prompt = `Crie um plano de 3 passos simples para hoje para um estudante com TDAH. 
-  Tarefas: ${pending}. Responda em texto curto e amigável.`;
-
-  try {
-    const res = await callGemini(prompt);
-    agenda.unshift({ date: new Date().toLocaleDateString(), content: res });
-    localStorage.setItem('agenda', JSON.stringify(agenda));
-    renderAgenda();
-  } catch (e) {}
-}
-
-function renderAgenda() {
-    const container = document.getElementById('agenda-container');
-    container.innerHTML = agenda.map(a => `
-        <div class="card">
-            <div class="card-label">${a.date}</div>
-            <div style="white-space:pre-wrap">${a.content}</div>
+    const list = document.getElementById('task-list');
+    list.innerHTML = tasks.map(t => `
+        <div class="task-item">
+            <input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggleTask(${t.id})">
+            <div style="flex:1; ${t.done ? 'text-decoration:line-through;opacity:0.5' : ''}">
+                ${t.nome} <span class="tag">${t.prioridade}</span>
+            </div>
+            <button style="background:none;border:none;color:var(--red);cursor:pointer" onclick="deleteTask(${t.id})">excluir</button>
         </div>
     `).join('');
 }
 
-// ==================== CHAT & PAUSAS ====================
-async function sendChat() {
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if(!text) return;
-
-  chatHistory.push({ role: 'user', text });
-  renderChat();
-  input.value = "";
-
-  const prompt = `Usuário com TDAH diz: "${text}". 
-  Responda como um mentor calmo em no máximo 3 frases.`;
-
-  try {
-    const res = await callGemini(prompt);
-    chatHistory.push({ role: 'ai', text: res });
-    renderChat();
-  } catch (e) {}
-}
-
-function renderChat() {
-  const container = document.getElementById('day-chat');
-  container.innerHTML = chatHistory.map(m => `
-    <div class="chat-msg ${m.role}">${m.text}</div>
-  `).join('');
-  container.scrollTop = container.scrollHeight;
-}
-
-// ==================== UTILITÁRIOS ====================
-function toast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast show toast-${type}`;
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-async function processQuickInput() {
-    const input = document.getElementById('quick-input');
-    const val = input.value.trim();
-    if(!val) return;
-    
-    tasks.unshift({ id: Date.now(), nome: val, prioridade: 'media', done: false });
+function toggleTask(id) {
+    const t = tasks.find(x => x.id === id);
+    if(t) t.done = !t.done;
     saveTasks();
     renderTasks();
-    input.value = "";
-    toast("Adicionado!", "green");
 }
 
-function renderProgress() {
-    const total = tasks.length;
-    const done = tasks.filter(t => t.done).length;
-    const pct = total ? Math.round((done/total)*100) : 0;
-    document.getElementById('progress-content').innerHTML = `
-        <div style="font-size:24px; font-weight:bold">${pct}% concluído</div>
-        <div style="color:var(--text-muted)">${done} de ${total} tarefas finalizadas</div>
-    `;
+function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    saveTasks();
+    renderTasks();
 }
 
-function renderDiary() {
-    const container = document.getElementById('diary-container');
-    container.innerHTML = `<div class="card">Seu diário é atualizado ao fechar a semana.</div>`;
+function saveTasks() { localStorage.setItem('foco_tasks', JSON.stringify(tasks)); }
+
+function showPage(name, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    el.classList.add('active');
 }
 
-// Iniciar
-checkAuth();
-renderTasks();
+function showToast(msg, color) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    t.style.borderLeft = `4px solid var(--${color})`;
+    setTimeout(() => t.style.display = 'none', 3000);
+}
 </script>
-
 </body>
 </html>
