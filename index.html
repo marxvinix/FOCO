@@ -452,7 +452,24 @@ function fmtDate(d){if(!d)return'';try{return new Date(d+'T12:00').toLocaleDateS
 function fmtDateLong(d){if(!d)return'';try{return new Date(d+'T12:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'})}catch(e){return d}}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
 function download(name,text){const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(text);a.download=name;a.click()}
-function safeJSON(s){try{return JSON.parse(s.replace(/```json|```/g,'').trim())}catch(e){return null}}
+function safeJSON(s){
+  if(!s) return null;
+  try{
+    // try direct parse first
+    return JSON.parse(s);
+  }catch(e){}
+  try{
+    // strip markdown fences
+    let clean=s.replace(/```json/gi,'').replace(/```/g,'').trim();
+    return JSON.parse(clean);
+  }catch(e){}
+  try{
+    // extract first { ... } block
+    const match=s.match(/\{[\s\S]*\}/);
+    if(match) return JSON.parse(match[0]);
+  }catch(e){}
+  return null;
+}
 
 // ==================== API SETUP ====================
 function checkApiKey(){
@@ -501,23 +518,36 @@ async function callGemini(prompt, key){
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
-          contents:[{parts:[{text:prompt}]}],
-          generationConfig:{temperature:0.7,maxOutputTokens:1200}
+          contents:[{role:'user',parts:[{text:prompt}]}],
+          generationConfig:{temperature:0.4,maxOutputTokens:1500,responseMimeType:'text/plain'},
+          safetySettings:[
+            {category:'HARM_CATEGORY_HARASSMENT',threshold:'BLOCK_NONE'},
+            {category:'HARM_CATEGORY_HATE_SPEECH',threshold:'BLOCK_NONE'},
+            {category:'HARM_CATEGORY_SEXUALLY_EXPLICIT',threshold:'BLOCK_NONE'},
+            {category:'HARM_CATEGORY_DANGEROUS_CONTENT',threshold:'BLOCK_NONE'}
+          ]
         })
       });
+      const data=await res.json();
+      console.log(`Gemini [${model}] status:`, res.status, 'response:', JSON.stringify(data).substring(0,400));
       if(!res.ok){
-        const errData=await res.json().catch(()=>({}));
-        lastErr=`${model} ${res.status}: ${errData?.error?.message||'erro'}`;
-        console.warn('Gemini error:', lastErr);
+        lastErr=`${model} ${res.status}: ${data?.error?.message||'erro'}`;
         continue;
       }
-      const data=await res.json();
+      // check for blocked response
+      if(data.candidates?.[0]?.finishReason==='SAFETY'){
+        lastErr=`${model} bloqueado por segurança`;
+        continue;
+      }
       const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-      if(!text){ lastErr='resposta vazia de '+model; continue; }
+      if(!text){
+        lastErr=`${model} resposta vazia. finishReason: ${data.candidates?.[0]?.finishReason||'?'}`;
+        continue;
+      }
       return text;
     }catch(e){
       lastErr=e.message;
-      console.warn('Gemini fetch error:', model, e.message);
+      console.warn('Gemini fetch error:', model, e);
       continue;
     }
   }
@@ -549,10 +579,14 @@ async function processQuickInput(){
   document.getElementById('quick-send-btn').disabled=true;
 
   const pending=tasks.filter(t=>!t.done).map(t=>t.name).join(', ')||'nenhuma';
-  const prompt=`Você é assistente de produtividade para alguém com TDAH. O usuário escreveu: "${text}"
-Tarefas existentes: ${pending}. Hoje: ${todayStr()}.
-Analise e retorne APENAS JSON válido sem markdown:
-{"acao":"tarefa|registro|sentimento|misto","tarefas":[{"nome":"...","prioridade":"alta|media|baixa","prazo":"YYYY-MM-DD ou null","nota":"contexto ou null"}],"registroAgenda":"texto ou null","resumo":"1 frase do que você fez com essa informação"}`;
+  const prompt=`Assistente de produtividade para alguém com TDAH. Hoje: ${todayStr()}.
+Tarefas existentes: ${pending}.
+O usuário escreveu: """${text}"""
+
+Responda SOMENTE com JSON, sem markdown, sem texto extra:
+{"acao":"tarefa","tarefas":[{"nome":"nome da tarefa","prioridade":"alta|media|baixa","prazo":"YYYY-MM-DD ou null","nota":"contexto ou null"}],"registroAgenda":null,"resumo":"1 frase do que você fez"}
+
+Se for só um sentimento sem tarefa, retorne tarefas:[] e registroAgenda com o texto.`;
 
   try{
     const res=await callGemini(prompt);
@@ -594,24 +628,31 @@ async function addTask(){
   const fb=document.getElementById('task-ai-feedback');
   btn.disabled=true;proc.style.display='inline';fb.innerHTML='';
 
-  const prompt=`Você é assistente de produtividade para alguém com TDAH estudando Engenharia Civil. O usuário escreveu:
+  const prompt=`Você é assistente de produtividade para alguém com TDAH estudando Engenharia Civil.
 
-"${text}"
+O usuário escreveu: """${text}"""
 
-Hoje é ${todayStr()}. Identifique TODAS as tarefas e retorne APENAS JSON válido sem markdown:
-{"tarefas":[{"nome":"nome curto e claro da tarefa","prioridade":"alta|media|baixa","prazo":"YYYY-MM-DD ou null","nota":"contexto em 1 frase ou null"}],"resumo":"1 frase do que você entendeu"}
+Hoje é ${todayStr()}.
 
-Regras importantes:
-- Separe CADA tarefa distinta em um item separado na lista
-- Prazos relativos: "sexta" = próxima sexta a partir de ${todayStr()}, "outra quarta" = próxima quarta-feira
-- Alta: prazo em menos de 4 dias ou explicitamente urgente
-- Baixa: mais de 14 dias ou "sem pressa"  
-- TCC e projetos grandes: crie uma tarefa para o primeiro passo concreto, não para o projeto inteiro`;
+Sua resposta deve ser SOMENTE o JSON abaixo, sem nenhum texto antes ou depois, sem markdown, sem explicação:
+{"tarefas":[{"nome":"nome curto da tarefa","prioridade":"alta","prazo":"YYYY-MM-DD","nota":"contexto breve"}],"resumo":"frase resumindo"}
+
+Regras:
+- prioridade: "alta" se prazo em menos de 4 dias ou urgente, "baixa" se mais de 14 dias, senão "media"
+- prazo: calcule datas relativas a partir de ${todayStr()}. "sexta" = próxima sexta, "outra quarta" = próxima quarta. Se não houver prazo, use null
+- Separe cada tarefa distinta em um item separado
+- Para TCC e projetos grandes, crie o primeiro passo concreto como tarefa
+- nota: contexto útil em 1 frase, ou null se não houver`;
 
   try{
     const res=await callGemini(prompt);
     const json=safeJSON(res);
-    if(!json||!json.tarefas||!json.tarefas.length)throw new Error('parse');
+    console.log('Gemini raw response:', res);
+    console.log('Parsed JSON:', json);
+    if(!json||!json.tarefas||!json.tarefas.length){
+      fb.innerHTML=`<div style="font-size:12px;color:var(--red)">A IA não retornou tarefas. Resposta: ${esc((res||'').substring(0,200))}</div>`;
+      throw new Error('parse');
+    }
     json.tarefas.forEach(t=>{
       tasks.unshift({id:Date.now()+Math.random(),name:t.nome,priority:t.prioridade||'media',due:t.prazo||'',nota:t.nota||'',done:false,partial:false,created:new Date().toISOString()});
     });
@@ -621,9 +662,10 @@ Regras importantes:
     document.getElementById('task-free').value='';
     setTimeout(()=>{fb.innerHTML=''},6000);
   }catch(e){
-    tasks.unshift({id:Date.now(),name:text,priority:'media',due:'',nota:'',done:false,partial:false,created:new Date().toISOString()});
-    save('tasks',tasks);renderTarefas();
-    fb.innerHTML='<div style="font-size:12px;color:var(--text-muted)">Não foi possível interpretar. Salvo como uma tarefa.</div>';
+    console.error('addTask error:', e);
+    if(!fb.innerHTML.includes('red')){
+      fb.innerHTML='<div style="font-size:12px;color:var(--red)">Erro: '+e.message+'</div>';
+    }
     document.getElementById('task-free').value='';
   }
   btn.disabled=false;proc.style.display='none';
