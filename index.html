@@ -452,7 +452,7 @@ function fmtDate(d){if(!d)return'';try{return new Date(d+'T12:00').toLocaleDateS
 function fmtDateLong(d){if(!d)return'';try{return new Date(d+'T12:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'})}catch(e){return d}}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
 function download(name,text){const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(text);a.download=name;a.click()}
-function safeJSON(s){try{const m=s.match(/\{[\s\S]*\}|\[[\s\S]*\]/);return m?JSON.parse(m[0]):null}catch(e){return null}}
+function safeJSON(s){try{return JSON.parse(s.replace(/```json|```/g,'').trim())}catch(e){return null}}
 
 // ==================== API SETUP ====================
 function checkApiKey(){
@@ -464,21 +464,21 @@ function checkApiKey(){
 async function saveApiKey(){
   const key=document.getElementById('setup-key').value.trim();
   const errEl=document.getElementById('setup-error');
+  const btn=document.querySelector('#setup-screen .btn-primary');
   if(!key){errEl.textContent='Cole sua chave antes de continuar.';errEl.style.display='block';return;}
   errEl.style.display='none';
-  // quick test
+  if(btn){btn.textContent='Verificando...';btn.disabled=true;}
   try{
-    const res=await callGemini('Responda apenas: ok',key);
-    if(res){
-      apiKey=key;
-      localStorage.setItem('gemini_key',key);
-      document.getElementById('setup-screen').style.display='none';
-      toast('Conectado ao Gemini.','green');
-    }
+    const res=await callGemini('Responda apenas a palavra: ok',key);
+    apiKey=key;
+    localStorage.setItem('gemini_key',key);
+    document.getElementById('setup-screen').style.display='none';
+    toast('Conectado ao Gemini.','green');
   }catch(e){
-    errEl.textContent='Chave inválida ou sem conexão. Verifique e tente novamente.';
+    errEl.textContent='Erro: '+e.message+'. Verifique se a chave está correta e tente novamente.';
     errEl.style.display='block';
   }
+  if(btn){btn.textContent='Entrar no app';btn.disabled=false;}
 }
 
 function resetApiKey(){
@@ -492,14 +492,36 @@ function resetApiKey(){
 // ==================== GEMINI API ====================
 async function callGemini(prompt, key){
   const k=key||apiKey;
-  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.7,maxOutputTokens:1200}})
-  });
-  if(!res.ok)throw new Error('API error '+res.status);
-  const data=await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+  if(!k) throw new Error('sem chave');
+  const models=['gemini-2.0-flash','gemini-1.5-flash'];
+  let lastErr='';
+  for(const model of models){
+    try{
+      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${k}`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          contents:[{parts:[{text:prompt}]}],
+          generationConfig:{temperature:0.7,maxOutputTokens:1200}
+        })
+      });
+      if(!res.ok){
+        const errData=await res.json().catch(()=>({}));
+        lastErr=`${model} ${res.status}: ${errData?.error?.message||'erro'}`;
+        console.warn('Gemini error:', lastErr);
+        continue;
+      }
+      const data=await res.json();
+      const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+      if(!text){ lastErr='resposta vazia de '+model; continue; }
+      return text;
+    }catch(e){
+      lastErr=e.message;
+      console.warn('Gemini fetch error:', model, e.message);
+      continue;
+    }
+  }
+  throw new Error(lastErr||'API indisponível');
 }
 
 // ==================== TOAST ====================
