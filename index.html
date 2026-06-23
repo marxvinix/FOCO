@@ -452,7 +452,7 @@ function fmtDate(d){if(!d)return'';try{return new Date(d+'T12:00').toLocaleDateS
 function fmtDateLong(d){if(!d)return'';try{return new Date(d+'T12:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'})}catch(e){return d}}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
 function download(name,text){const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(text);a.download=name;a.click()}
-function safeJSON(s){try{return JSON.parse(s.replace(/```json|```/g,'').trim())}catch(e){return null}}
+function safeJSON(s){try{const m=s.match(/\{[\s\S]*\}|\[[\s\S]*\]/);return m?JSON.parse(m[0]):null}catch(e){return null}}
 
 // ==================== API SETUP ====================
 function checkApiKey(){
