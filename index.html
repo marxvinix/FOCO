@@ -442,21 +442,28 @@ function safeJSON(s){
 
 // ==================== GEMINI API ====================
 async function callGemini(prompt){
-  // uses puter.js - no API key needed, completely free
   try {
-    const response = await puter.ai.chat(prompt, {
-      model: 'claude-sonnet-4-6',
-      temperature: 0.4
-    });
-    // puter.ai.chat can return string or object
+    const response = await puter.ai.chat(prompt, { model: 'claude-sonnet-4-6' });
+    console.log('Puter raw response:', JSON.stringify(response).substring(0,300));
+    // extract text from any response shape puter returns
     if(typeof response === 'string') return response;
-    if(response?.message?.content) return response.message.content;
-    if(response?.text) return response.text;
-    if(response?.content) return response.content;
-    return String(response);
+    if(typeof response?.message === 'string') return response.message;
+    if(typeof response?.message?.content === 'string') return response.message.content;
+    if(Array.isArray(response?.message?.content)){
+      return response.message.content.map(b => b.text||'').join('');
+    }
+    if(typeof response?.text === 'string') return response.text;
+    if(typeof response?.content === 'string') return response.content;
+    if(Array.isArray(response?.content)){
+      return response.content.map(b => b.text||'').join('');
+    }
+    // last resort: stringify and hope for the best
+    const s = JSON.stringify(response);
+    console.warn('Unknown puter response shape, stringified:', s.substring(0,200));
+    return s;
   } catch(e) {
     console.error('Puter AI error:', e);
-    throw new Error('IA indisponível: ' + e.message);
+    throw new Error('IA indisponível: ' + (e.message||String(e)));
   }
 }
 
