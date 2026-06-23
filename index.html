@@ -3,216 +3,1187 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>fo.co - TDAH Productivity</title>
+<title>Foco</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0F0F0F;--surface:#1A1A1A;--surface2:#222;--border:#2E2E2E;
+  --bg:#0F0F0F;--surface:#1A1A1A;--surface2:#222;--border:#2E2E2E;--border-light:#383838;
   --text:#EFEFEF;--text-soft:#999;--text-muted:#555;
   --accent:#C8B47A;--accent-dim:#3A3020;--accent-hover:#D9C98E;
   --green:#4CAF7D;--green-dim:#1A2E22;--red:#E05252;--red-dim:#2E1A1A;
+  --blue:#5B8DEF;--blue-dim:#1A2040;--purple:#A47EE0;--purple-dim:#231A38;
   --r:8px;--r-sm:5px;
 }
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
 
-/* SETUP SCREEN */
-#setup-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
-.setup-box{max-width:480px;width:100%}
-.setup-logo{font-size:28px;font-weight:600;margin-bottom:8px}
-.setup-logo span{color:var(--accent)}
-input,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;color:var(--text);font-family:inherit;margin-bottom:12px;outline:none}
-input:focus{border-color:var(--accent)}
-.btn{padding:12px 18px;border:none;border-radius:var(--r-sm);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:0.2s;width:100%}
-.btn-primary{background:var(--accent);color:#0F0F0F}
-.btn-primary:hover{background:var(--accent-hover)}
+/* Setup screen removed - using Puter.js */
 
-/* LAYOUT */
-.sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0}
-.nav-item{padding:12px 20px;cursor:pointer;color:var(--text-soft);font-weight:500}
-.nav-item.active{color:var(--accent);background:var(--accent-dim);border-left:3px solid var(--accent)}
-.main{margin-left:200px;padding:32px;max-width:900px}
+/* SIDEBAR */
+.sidebar{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;position:fixed;top:0;bottom:64px;left:0;overflow-y:auto}
+.logo{padding:0 20px 24px;font-size:18px;font-weight:600;letter-spacing:-0.5px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.logo span{color:var(--accent)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-soft);transition:all .15s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:var(--surface2)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim)}
+.nav-icon{width:16px;text-align:center;opacity:.7}
+.nav-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
+.api-status{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;cursor:pointer}
+.api-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+/* MAIN */
+.main{margin-left:200px;padding:32px 32px 100px;max-width:940px}
 .page{display:none}.page.active{display:block}
+.page-title{font-size:22px;font-weight:600;letter-spacing:-0.5px;margin-bottom:4px}
+.page-sub{color:var(--text-muted);font-size:13px;margin-bottom:28px}
+
+/* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
-.task-item{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border)}
-.tag{font-size:10px;padding:2px 6px;border-radius:3px;background:var(--surface2);text-transform:uppercase}
+.card-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+
+/* INPUTS */
+input,textarea,select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border-color .15s}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+input::placeholder,textarea::placeholder{color:var(--text-muted)}
+textarea{resize:vertical;min-height:80px}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23555' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer}
+label{font-size:12px;font-weight:500;color:var(--text-soft);display:block;margin-bottom:6px}
+.field{margin-bottom:14px}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border:none;border-radius:var(--r-sm);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--accent);color:#0F0F0F}.btn-primary:hover{background:var(--accent-hover)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--text-soft);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+.btn-danger{background:transparent;color:var(--red);border:1px solid #3A2020;font-size:12px;padding:6px 10px}
+.btn-danger:hover{background:var(--red-dim)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* TASKS */
+.task-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);margin-bottom:8px;transition:border-color .15s}
+.task-item:hover{border-color:var(--border-light)}
+.task-item.done{opacity:.4}.task-item.done .task-name{text-decoration:line-through}
+.task-check{width:18px;height:18px;border:1.5px solid var(--border-light);border-radius:50%;cursor:pointer;flex-shrink:0;margin-top:3px;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.task-check:hover{border-color:var(--green)}
+.task-check.checked{background:var(--green);border-color:var(--green)}
+.task-check.checked::after{content:'✓';color:#0F0F0F;font-size:10px;font-weight:700}
+.task-info{flex:1;min-width:0}
+.task-name{font-size:14px;font-weight:400}
+.task-meta{font-size:11px;color:var(--text-muted);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap}
+.task-nota{font-size:12px;color:var(--text-muted);margin-top:4px;font-style:italic}
+.tag{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.tag-alta{background:var(--red-dim);color:var(--red)}
+.tag-media{background:#2A2510;color:#C8A84A}
+.tag-baixa{background:var(--green-dim);color:var(--green)}
+.tag-partial{background:var(--accent-dim);color:var(--accent)}
+
+/* AGENDA */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:20px}
+.week-day{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 8px;min-height:80px;cursor:pointer;transition:border-color .15s}
+.week-day:hover{border-color:var(--border-light)}
+.week-day.today{border-color:var(--accent)}
+.week-day.has-plan{border-color:var(--green-dim)}
+.week-day-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.week-day-date{font-size:13px;font-weight:600;margin-bottom:6px}
+.week-day-tasks{font-size:10px;color:var(--text-muted);line-height:1.5}
+.week-day.today .week-day-date{color:var(--accent)}
+.day-block{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+.day-header{background:var(--surface2);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.day-date-label{font-size:13px;font-weight:600}
+.day-badge{font-size:11px;color:var(--text-muted)}
+.day-body{padding:18px;background:var(--surface);display:none}
+.day-body.open{display:block}
+.day-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.day-col-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.day-plan-text{font-size:12px;color:var(--text-soft);line-height:1.8;white-space:pre-wrap;font-family:'JetBrains Mono',monospace}
+.ai-insight{background:var(--accent-dim);border-left:2px solid var(--accent);padding:10px 14px;border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:12px;color:var(--accent);margin-top:12px;line-height:1.6}
+.future-badge{background:var(--blue-dim);border-left:2px solid var(--blue);padding:8px 12px;border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:12px;color:var(--blue);margin-top:10px}
+
+/* PAUSAS - CHAT STYLE */
+.day-chat{display:flex;flex-direction:column;gap:10px;min-height:200px;max-height:420px;overflow-y:auto;padding:4px 0;margin-bottom:14px}
+.chat-msg{max-width:86%;padding:11px 15px;border-radius:12px;font-size:13px;line-height:1.6}
+.chat-msg.user{background:var(--surface2);border:1px solid var(--border);align-self:flex-end;border-bottom-right-radius:3px}
+.chat-msg.ai{background:var(--accent-dim);border:1px solid #4A3A20;color:var(--accent);align-self:flex-start;border-bottom-left-radius:3px}
+.chat-msg.reward{background:var(--purple-dim);border:1px solid var(--purple);color:var(--purple);align-self:flex-start;border-bottom-left-radius:3px}
+.chat-msg .msg-time{font-size:10px;opacity:.5;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.chat-input-row{display:flex;gap:8px}
+.chat-input-row textarea{min-height:auto;height:42px;resize:none;flex:1}
+.honest-area{border-top:1px solid var(--border);padding-top:16px;margin-top:4px}
+.honest-btn{width:100%;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);color:var(--text-soft);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;text-align:left}
+.honest-btn:hover{border-color:var(--red);color:var(--text);background:var(--red-dim)}
+.honest-response-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-size:13px;color:var(--text-soft);line-height:1.7;margin-top:12px;white-space:pre-wrap}
+.honest-correction{display:flex;gap:8px;margin-top:10px}
+.honest-correction input{font-size:13px}
+
+/* PROGRESS */
+.progress-bar-wrap{background:var(--surface2);border-radius:99px;height:6px;margin:8px 0 4px;overflow:hidden}
+.progress-bar{background:var(--green);height:100%;border-radius:99px;transition:width .5s}
+.checklist-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border);transition:background .1s}
+.checklist-item:last-child{border-bottom:none}
+.checklist-item:hover{background:var(--surface2)}
+.check-status{width:22px;height:22px;border-radius:var(--r-sm);border:1.5px solid var(--border-light);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s;font-weight:700}
+.status-done{background:var(--green);border-color:var(--green);color:#0F0F0F}
+.status-partial{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.status-pending{color:transparent}
+
+/* DIARY */
+.diary-entry{border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.diary-date{font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+.diary-text{font-size:13px;color:var(--text-soft);line-height:1.7}
+.score-pill{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600}
+.score-focus{background:var(--blue-dim);color:var(--blue)}
+.chart-wrap{padding:8px 0;overflow-x:auto}
+
+/* ROUTINE */
+.routine-table{width:100%;border-collapse:collapse;font-size:13px}
+.routine-table th{padding:10px 12px;text-align:left;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border)}
+.routine-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text-soft)}
+.routine-table tr:last-child td{border-bottom:none}
+.routine-table tr:hover td{background:var(--surface2)}
+.cell-high{color:var(--green);font-weight:500}.cell-low{color:var(--red)}.cell-mid{color:var(--accent)}
+
+/* WEEKS */
+.week-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px;background:var(--surface)}
+.week-info{flex:1}
+.week-label{font-size:13px;font-weight:500}
+.week-meta{font-size:11px;color:var(--text-muted);margin-top:2px}
+.week-actions{display:flex;gap:8px}
+
+/* QUICK BAR */
+.quick-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:10px 20px;display:flex;gap:8px;align-items:center;z-index:100}
+.quick-bar input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 14px;color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:border-color .15s}
+.quick-bar input:focus{border-color:var(--accent)}
+.quick-bar input::placeholder{color:var(--text-muted)}
+.crisis-btn{background:var(--red-dim);border:1px solid #5A2A2A;color:var(--red);padding:9px 14px;border-radius:var(--r-sm);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s}
+.crisis-btn:hover{background:#3A1A1A}
+.quick-send{background:var(--accent);color:#0F0F0F;border:none;padding:9px 16px;border-radius:var(--r-sm);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.quick-send:hover{background:var(--accent-hover)}
+.quick-send:disabled{opacity:.4;cursor:not-allowed}
+
+/* CRISIS */
+.crisis-overlay{position:fixed;inset:0;background:rgba(30,10,10,.96);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.crisis-overlay.open{opacity:1;pointer-events:all}
+.crisis-box{max-width:480px;width:90%;padding:32px}
+.crisis-heading{font-size:20px;font-weight:600;color:var(--red);margin-bottom:8px}
+.crisis-sub{color:var(--text-soft);font-size:14px;margin-bottom:20px;line-height:1.6}
+.crisis-response-box{background:var(--red-dim);border:1px solid #4A2020;border-radius:var(--r);padding:16px;font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;margin-top:16px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;max-width:520px;width:90%;max-height:80vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px}
+.modal-close{float:right;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:20px;line-height:1}
 
 /* TOAST */
-#toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);z-index:1000;display:none}
+.toast{position:fixed;top:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 18px;font-size:13px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:999;transform:translateY(-10px);opacity:0;transition:all .25s;max-width:340px;line-height:1.5}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-accent{border-left:2px solid var(--accent)}
+.toast-green{border-left:2px solid var(--green)}
+.toast-red{border-left:2px solid var(--red)}
 
-@media(max-width:700px){.sidebar{display:none}.main{margin-left:0}}
+/* MISC */
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+.empty{text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px}
+.loading{color:var(--text-muted);font-size:13px;padding:8px 0;font-style:italic}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+/* BOTTOM NAV */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:150}
+.bottom-nav-inner{display:flex;overflow-x:auto;scrollbar-width:none}
+.bottom-nav-inner::-webkit-scrollbar{display:none}
+.bnav-item{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 12px;cursor:pointer;color:var(--text-muted);font-size:9px;font-weight:500;border-top:2px solid transparent;transition:all .15s;white-space:nowrap}
+.bnav-item.active{color:var(--accent);border-top-color:var(--accent)}
+.bnav-icon{font-size:15px}
+
+@media(max-width:700px){
+  .sidebar{display:none}
+  .bottom-nav{display:block}
+  .main{margin-left:0;padding:16px 14px 0;padding-bottom:130px}
+  .quick-bar{bottom:52px;padding:8px 10px;gap:6px}
+  .quick-bar input{font-size:13px;padding:8px 10px}
+  .crisis-btn,.quick-send{padding:8px 10px;font-size:12px}
+  .day-cols{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<div id="setup-screen">
-  <div class="setup-box">
-    <div class="setup-logo">fo<span>.</span>co</div>
-    <p style="color:var(--text-soft);margin-bottom:20px">Insira sua chave API do Gemini:</p>
-    <input type="password" id="setup-key" placeholder="AIzaSy...">
-    <button class="btn btn-primary" onclick="saveApiKey()">Entrar no app</button>
-  </div>
-</div>
-
+<!-- SETUP SCREEN REMOVED - using Puter.js (no API key needed) -->
+<!-- SIDEBAR -->
 <nav class="sidebar">
-  <div style="padding:0 20px 20px;font-size:18px;font-weight:700">fo<span>.</span>co</div>
-  <div class="nav-item active" onclick="showPage('tarefas',this)">Tarefas</div>
-  <div class="nav-item" onclick="showPage('agenda',this)">Agenda</div>
-  <div style="margin-top:auto;padding:20px;font-size:10px;color:var(--text-muted);cursor:pointer" onclick="resetKey()">Trocar Chave API</div>
+  <div class="logo">fo<span>.</span>co</div>
+  <div class="nav-item active" onclick="showPage('tarefas',this)"><span class="nav-icon">▤</span> Tarefas</div>
+  <div class="nav-item" onclick="showPage('agenda',this)"><span class="nav-icon">◫</span> Agenda</div>
+  <div class="nav-item" onclick="showPage('pausas',this)"><span class="nav-icon">◆</span> Pausas e Recompensas</div>
+  <div class="nav-item" onclick="showPage('progresso',this)"><span class="nav-icon">◈</span> Progresso</div>
+  <div class="nav-item" onclick="showPage('diario',this)"><span class="nav-icon">◉</span> Diário evolutivo</div>
+  <div class="nav-item" onclick="showPage('rotina',this)"><span class="nav-icon">◧</span> Minha rotina</div>
+  <div class="nav-item" onclick="showPage('semanas',this)"><span class="nav-icon">◪</span> Semanas</div>
+  <div class="nav-bottom">
+    <div class="api-status">
+      <div class="api-dot"></div>
+      <span>IA conectada · Puter.js</span>
+    </div>
+  </div>
+</nav>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <div class="bnav-item active" onclick="showPage('tarefas',this)"><span class="bnav-icon">▤</span>Tarefas</div>
+    <div class="bnav-item" onclick="showPage('agenda',this)"><span class="bnav-icon">◫</span>Agenda</div>
+    <div class="bnav-item" onclick="showPage('pausas',this)"><span class="bnav-icon">◆</span>Pausas</div>
+    <div class="bnav-item" onclick="showPage('progresso',this)"><span class="bnav-icon">◈</span>Progresso</div>
+    <div class="bnav-item" onclick="showPage('diario',this)"><span class="bnav-icon">◉</span>Diário</div>
+    <div class="bnav-item" onclick="showPage('rotina',this)"><span class="bnav-icon">◧</span>Rotina</div>
+    <div class="bnav-item" onclick="showPage('semanas',this)"><span class="bnav-icon">◪</span>Semanas</div>
+  </div>
 </nav>
 
 <div class="main">
+
+  <!-- TAREFAS -->
   <div class="page active" id="page-tarefas">
-    <h2>Tarefas</h2>
-    <div class="card" style="margin-top:20px">
-      <textarea id="task-input" placeholder="O que você precisa fazer?" rows="4"></textarea>
-      <button class="btn btn-primary" id="ai-btn" onclick="addTask()">Organizar com IA</button>
+    <div class="page-title">Tarefas</div>
+    <div class="page-sub">Descreva sua situação à vontade. A IA interpreta e separa em tarefas.</div>
+    <div class="card">
+      <div class="field">
+        <textarea id="task-free" style="min-height:140px" placeholder="Escreva tudo que está na sua cabeça — prazos, contexto, urgência, qualquer coisa misturada. A IA lê e separa automaticamente."></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-add-task" onclick="addTask()">A IA organiza isso</button>
+        <span id="task-processing" style="font-size:12px;color:var(--text-muted);display:none">Interpretando...</span>
+      </div>
+      <div id="task-ai-feedback" style="margin-top:12px"></div>
     </div>
-    <div id="task-list"></div>
+    <div id="task-section-pending"></div>
+    <div id="task-section-done"></div>
   </div>
 
+  <!-- AGENDA -->
   <div class="page" id="page-agenda">
-    <h2>Agenda</h2>
-    <div id="agenda-list" style="margin-top:20px"></div>
+    <div class="page-title">Agenda</div>
+    <div class="page-sub">Plano distribuído ao longo da semana. A IA não coloca tudo no mesmo dia.</div>
+    <div class="btn-row" style="margin-bottom:20px">
+      <button class="btn btn-primary" onclick="gerarSemana()">Gerar plano da semana</button>
+      <button class="btn btn-ghost" onclick="gerarAgendaHoje()">Só hoje</button>
+    </div>
+    <div class="week-grid" id="week-grid"></div>
+    <div id="agenda-list"></div>
+  </div>
+
+  <!-- PAUSAS E RECOMPENSAS -->
+  <div class="page" id="page-pausas">
+    <div class="page-title">Pausas e Recompensas</div>
+    <div class="page-sub">Conte como o dia está indo. A IA responde com o que faz sentido agora.</div>
+
+    <div class="card">
+      <div class="card-label">Como o dia está indo</div>
+      <div class="day-chat" id="day-chat"></div>
+      <div class="chat-input-row">
+        <textarea id="chat-day-input" placeholder="Travei no TCC, fiz duas coisas, estou há uma hora no celular, me sinto esgotado..." onkeydown="chatDayKeydown(event)"></textarea>
+        <button class="btn btn-primary" onclick="sendDayChat()" id="chat-day-btn">Enviar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Modo honesto</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.6">Quando você percebe que está na recompensa sem ter feito nada. Sem julgamento — a IA sugere o menor passo possível para sair do ciclo.</p>
+      <button class="honest-btn" onclick="modoHonesto()">Estou usando a recompensa sem ter feito nada — me ajuda a sair disso</button>
+      <div id="honest-response-area"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Histórico de hoje</div>
+      <div id="pausas-history"></div>
+    </div>
+  </div>
+
+  <!-- PROGRESSO -->
+  <div class="page" id="page-progresso">
+    <div class="page-title">Progresso</div>
+    <div class="page-sub">Estado de cada tarefa. Clique para avançar o status.</div>
+    <div class="card" style="margin-bottom:20px"><div id="progress-overview"></div></div>
+    <div class="card"><div class="card-label">Todas as tarefas</div><div id="checklist-list"></div></div>
+  </div>
+
+  <!-- DIÁRIO -->
+  <div class="page" id="page-diario">
+    <div class="page-title">Diário evolutivo</div>
+    <div class="page-sub">A IA interpreta seus dias e registra sua evolução automaticamente.</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-label">Evolução — foco estimado</div>
+      <div class="chart-wrap"><canvas id="evolucao-chart" height="110"></canvas></div>
+    </div>
+    <div id="diary-list"></div>
+  </div>
+
+  <!-- ROTINA -->
+  <div class="page" id="page-rotina">
+    <div class="page-title">Minha rotina</div>
+    <div class="page-sub">Padrões que a IA identificou no seu jeito de trabalhar.</div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-label">Leitura da semana</div>
+      <div id="rotina-insight" class="loading">Registre alguns dias na agenda para a IA identificar padrões.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Tabela semanal</div>
+      <div style="overflow-x:auto">
+        <table class="routine-table">
+          <thead><tr><th>Dia</th><th>Concluídas</th><th>Foco</th><th>Destaque</th></tr></thead>
+          <tbody id="rotina-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEMANAS -->
+  <div class="page" id="page-semanas">
+    <div class="page-title">Semanas</div>
+    <div class="page-sub">Histórico completo. Feche, baixe, compare, importe.</div>
+    <div class="btn-row" style="margin-bottom:24px">
+      <button class="btn btn-primary" onclick="fecharSemana()">Fechar semana atual</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('import-file').click()">Importar</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importarSemana(event)">
+      <button class="btn btn-ghost btn-sm" onclick="showCompareModal()">Comparar semanas</button>
+    </div>
+    <div id="semanas-list"></div>
   </div>
 </div>
 
-<div id="toast"></div>
+<!-- QUICK BAR -->
+<div class="quick-bar">
+  <input id="quick-input" placeholder="Qualquer coisa — tarefa, prazo, como está se sentindo... a IA distribui" onkeydown="if(event.key==='Enter')processQuickInput()">
+  <button class="crisis-btn" onclick="openCrisis()">Modo crise</button>
+  <button class="quick-send" id="quick-send-btn" onclick="processQuickInput()">Enviar</button>
+</div>
 
+<!-- CRISIS -->
+<div class="crisis-overlay" id="crisis-overlay">
+  <div class="crisis-box">
+    <div class="crisis-heading">Modo crise</div>
+    <div class="crisis-sub">O que está acontecendo? Escreva à vontade.</div>
+    <textarea id="crisis-input" style="min-height:100px" placeholder="Hoje foi um caos. Não consigo começar nada..."></textarea>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn btn-primary" onclick="processCrisis()" style="background:var(--red);color:white">Reorganizar</button>
+      <button class="btn btn-ghost" onclick="closeCrisis()">Fechar</button>
+    </div>
+    <div id="crisis-response-area"></div>
+  </div>
+</div>
+
+<!-- COMPARE MODAL -->
+<div class="modal-overlay" id="compare-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('compare-modal')">×</button>
+    <div class="modal-title">Comparar semanas</div>
+    <div class="modal-sub">A IA analisa sua evolução entre duas semanas.</div>
+    <div class="field"><label>Semana A</label><select id="compare-a"></select></div>
+    <div class="field"><label>Semana B</label><select id="compare-b"></select></div>
+    <button class="btn btn-primary" onclick="compararSemanas()">Comparar</button>
+    <div id="compare-result" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://js.puter.com/v2/"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-let tasks = JSON.parse(localStorage.getItem('foco_tasks')) || [];
-let apiKey = localStorage.getItem('foco_key') || '';
+// ==================== STATE ====================
+let tasks       = load('tasks',[]);
+let agenda      = load('agenda',[]);
+let diary       = load('diary',[]);
+let semanas     = load('semanas',[]);
+let weekNum     = load('weekNum',1);
+let dayChat     = load('dayChat',[]);  // [{role:'user'|'ai'|'reward', text, time}]
+let pausasLog   = load('pausasLog',[]); // daily log
+// Puter.js - no API key needed
 
-if(apiKey) document.getElementById('setup-screen').style.display = 'none';
-renderTasks();
-
-function saveApiKey() {
-    const key = document.getElementById('setup-key').value.trim();
-    if(!key) return alert("Por favor, insira a chave.");
-    localStorage.setItem('foco_key', key);
-    apiKey = key;
-    document.getElementById('setup-screen').style.display = 'none';
-    location.reload(); 
+function load(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function todayStr(){return new Date().toISOString().split('T')[0]}
+function nowTime(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+function fmtDate(d){if(!d)return'';try{return new Date(d+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}catch(e){return d}}
+function fmtDateLong(d){if(!d)return'';try{return new Date(d+'T12:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'})}catch(e){return d}}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
+function download(name,text){const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(text);a.download=name;a.click()}
+function safeJSON(s){
+  if(!s) return null;
+  try{
+    // try direct parse first
+    return JSON.parse(s);
+  }catch(e){}
+  try{
+    // strip markdown fences
+    let clean=s.replace(/```json/gi,'').replace(/```/g,'').trim();
+    return JSON.parse(clean);
+  }catch(e){}
+  try{
+    // extract first { ... } block
+    const match=s.match(/\{[\s\S]*\}/);
+    if(match) return JSON.parse(match[0]);
+  }catch(e){}
+  return null;
 }
 
-function resetKey() {
-    localStorage.removeItem('foco_key');
-    location.reload();
+// ==================== API SETUP ====================
+// checkApiKey removed
+
+// saveApiKey removed
+
+// resetApiKey removed
+
+// ==================== GEMINI API ====================
+async function callGemini(prompt){
+  // uses puter.js - no API key needed, completely free
+  try {
+    const response = await puter.ai.chat(prompt, {
+      model: 'claude-sonnet-4-6',
+      temperature: 0.4
+    });
+    // puter.ai.chat can return string or object
+    if(typeof response === 'string') return response;
+    if(response?.message?.content) return response.message.content;
+    if(response?.text) return response.text;
+    if(response?.content) return response.content;
+    return String(response);
+  } catch(e) {
+    console.error('Puter AI error:', e);
+    throw new Error('IA indisponível: ' + e.message);
+  }
 }
 
-async function callGemini(prompt) {
-    // TENTATIVA 1: v1beta com gemini-1.5-flash (Mais provável de funcionar)
-    // TENTATIVA 2: v1beta com gemini-pro (Reserva clássica)
-    const models = ['gemini-1.5-flash', 'gemini-pro', 'gemini-1.5-flash-latest'];
-    let lastError = "";
-
-    for (let modelName of models) {
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                return data.candidates[0].content.parts[0].text;
-            } else {
-                lastError = data.error?.message || "Erro desconhecido";
-                console.warn(`Tentativa com ${modelName} falhou: ${lastError}`);
-                // Se o erro não for 404, não adianta tentar outros modelos (ex: erro de chave)
-                if (response.status !== 404) break;
-            }
-        } catch (e) {
-            lastError = e.message;
-        }
-    }
-
-    alert(`ERRO CRÍTICO: ${lastError}\n\nSugestão: Verifique se sua chave API está correta e se o projeto no AI Studio tem a 'Generative Language API' ativada.`);
-    throw new Error(lastError);
+// ==================== TOAST ====================
+function toast(msg,type='accent'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=`toast toast-${type} show`;
+  setTimeout(()=>t.classList.remove('show'),3500);
 }
 
-async function addTask() {
-    const input = document.getElementById('task-input');
-    const btn = document.getElementById('ai-btn');
-    const text = input.value.trim();
-    if(!text) return;
+// ==================== NAV ====================
+function showPage(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item,.bnav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(el)el.classList.add('active');
+  renders[name]&&renders[name]();
+}
 
-    btn.disabled = true;
-    btn.textContent = "IA está pensando...";
+// ==================== QUICK INPUT ====================
+async function processQuickInput(){
+  const input=document.getElementById('quick-input');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  document.getElementById('quick-send-btn').disabled=true;
 
-    const prompt = `Atue como assistente para TDAH. Liste as tarefas abaixo em JSON. 
-    Responda APENAS JSON puro: {"tarefas": [{"nome": "...", "prioridade": "alta|media|baixa"}]}
-    Texto: "${text}"`;
+  const pending=tasks.filter(t=>!t.done).map(t=>t.name).join(', ')||'nenhuma';
+  const prompt=`Assistente de produtividade para alguém com TDAH. Hoje: ${todayStr()}.
+Tarefas existentes: ${pending}.
+O usuário escreveu: """${text}"""
 
-    try {
-        const result = await callGemini(prompt);
-        const cleanJson = result.replace(/```json/g, '').replace(/```/g, '').trim();
-        const data = JSON.parse(cleanJson);
-        
-        data.tarefas.forEach(t => {
-            tasks.unshift({id: Date.now() + Math.random(), nome: t.nome, prioridade: t.prioridade, done: false});
+Responda SOMENTE com JSON, sem markdown, sem texto extra:
+{"acao":"tarefa","tarefas":[{"nome":"nome da tarefa","prioridade":"alta|media|baixa","prazo":"YYYY-MM-DD ou null","nota":"contexto ou null"}],"registroAgenda":null,"resumo":"1 frase do que você fez"}
+
+Se for só um sentimento sem tarefa, retorne tarefas:[] e registroAgenda com o texto.`;
+
+  try{
+    const res=await callGemini(prompt);
+    const json=safeJSON(res);
+    if(json){
+      let acoes=[];
+      if(json.tarefas&&json.tarefas.length){
+        json.tarefas.forEach(t=>{
+          tasks.unshift({id:Date.now()+Math.random(),name:t.nome,priority:t.prioridade||'media',due:t.prazo||'',nota:t.nota||'',done:false,partial:false,created:new Date().toISOString()});
         });
-        
-        saveTasks();
-        renderTasks();
-        input.value = "";
-        showToast("Sucesso!", "green");
-    } catch (e) {
-        showToast("Erro na IA", "red");
-    } finally {
-        btn.disabled = false;
-        btn.textContent = "Organizar com IA";
+        save('tasks',tasks);
+        acoes.push(`${json.tarefas.length} tarefa(s) adicionada(s)`);
+      }
+      if(json.registroAgenda){
+        const today=todayStr();
+        let day=agenda.find(d=>d.date===today);
+        if(!day){day={date:today,plan:'',reality:'',aiInsight:'',future:false};agenda.unshift(day);}
+        day.reality=(day.reality?day.reality+'\n':'')+json.registroAgenda;
+        save('agenda',agenda);
+        acoes.push('registrado na agenda');
+      }
+      toast(json.resumo||'Processado.','green');
+    } else {
+      // fallback: add as task
+      tasks.unshift({id:Date.now(),name:text,priority:'media',due:'',nota:'',done:false,partial:false,created:new Date().toISOString()});
+      save('tasks',tasks);
+      toast('Adicionado como tarefa.','accent');
     }
+  }catch(e){toast('Erro. Verifique sua chave de API.','red');}
+  document.getElementById('quick-send-btn').disabled=false;
 }
 
-function renderTasks() {
-    const list = document.getElementById('task-list');
-    list.innerHTML = tasks.map(t => `
-        <div class="task-item">
-            <input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggleTask(${t.id})">
-            <div style="flex:1; ${t.done ? 'text-decoration:line-through;opacity:0.5' : ''}">
-                ${t.nome} <span class="tag">${t.prioridade}</span>
-            </div>
-            <button style="background:none;border:none;color:var(--red);cursor:pointer" onclick="deleteTask(${t.id})">excluir</button>
+// ==================== TASKS ====================
+async function addTask(){
+  const text=document.getElementById('task-free').value.trim();
+  if(!text)return;
+  const btn=document.getElementById('btn-add-task');
+  const proc=document.getElementById('task-processing');
+  const fb=document.getElementById('task-ai-feedback');
+  btn.disabled=true;proc.style.display='inline';fb.innerHTML='';
+
+  const prompt=`Você é assistente de produtividade para alguém com TDAH estudando Engenharia Civil.
+
+O usuário escreveu: """${text}"""
+
+Hoje é ${todayStr()}.
+
+Sua resposta deve ser SOMENTE o JSON abaixo, sem nenhum texto antes ou depois, sem markdown, sem explicação:
+{"tarefas":[{"nome":"nome curto da tarefa","prioridade":"alta","prazo":"YYYY-MM-DD","nota":"contexto breve"}],"resumo":"frase resumindo"}
+
+Regras:
+- prioridade: "alta" se prazo em menos de 4 dias ou urgente, "baixa" se mais de 14 dias, senão "media"
+- prazo: calcule datas relativas a partir de ${todayStr()}. "sexta" = próxima sexta, "outra quarta" = próxima quarta. Se não houver prazo, use null
+- Separe cada tarefa distinta em um item separado
+- Para TCC e projetos grandes, crie o primeiro passo concreto como tarefa
+- nota: contexto útil em 1 frase, ou null se não houver`;
+
+  try{
+    const res=await callGemini(prompt);
+    const json=safeJSON(res);
+    console.log('Gemini raw response:', res);
+    console.log('Parsed JSON:', json);
+    if(!json||!json.tarefas||!json.tarefas.length){
+      fb.innerHTML=`<div style="font-size:12px;color:var(--red)">A IA não retornou tarefas. Resposta: ${esc((res||'').substring(0,200))}</div>`;
+      throw new Error('parse');
+    }
+    json.tarefas.forEach(t=>{
+      tasks.unshift({id:Date.now()+Math.random(),name:t.nome,priority:t.prioridade||'media',due:t.prazo||'',nota:t.nota||'',done:false,partial:false,created:new Date().toISOString()});
+    });
+    save('tasks',tasks);
+    renderTarefas();
+    fb.innerHTML=`<div class="ai-insight">${esc(json.resumo||'')} — ${json.tarefas.length} tarefa(s) adicionada(s).</div>`;
+    document.getElementById('task-free').value='';
+    setTimeout(()=>{fb.innerHTML=''},6000);
+  }catch(e){
+    console.error('addTask error:', e);
+    if(!fb.innerHTML.includes('red')){
+      fb.innerHTML='<div style="font-size:12px;color:var(--red)">Erro: '+e.message+'</div>';
+    }
+    document.getElementById('task-free').value='';
+  }
+  btn.disabled=false;proc.style.display='none';
+}
+
+function toggleDone(id){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  t.done=!t.done;if(t.done)t.partial=false;
+  save('tasks',tasks);renderTarefas();autoUpdateDiary();
+}
+function setPartial(id){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  t.partial=!t.partial;t.done=false;
+  save('tasks',tasks);renderTarefas();
+}
+function deleteTask(id){tasks=tasks.filter(x=>x.id!==id);save('tasks',tasks);renderTarefas()}
+
+function renderTarefas(){
+  const pending=tasks.filter(t=>!t.done);
+  const done=tasks.filter(t=>t.done);
+  document.getElementById('task-section-pending').innerHTML=pending.length?
+    `<div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Pendentes — ${pending.length}</div>`+pending.map(taskHTML).join(''):
+    '<div class="empty">Nenhuma tarefa pendente.</div>';
+  document.getElementById('task-section-done').innerHTML=done.length?
+    `<hr class="divider"><div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Concluídas — ${done.length}</div>`+done.map(taskHTML).join(''):
+    '';
+}
+
+function taskHTML(t){
+  const tagP=`<span class="tag tag-${t.priority}">${t.priority==='alta'?'Urgente':t.priority==='baixa'?'Sem pressa':'Normal'}</span>`;
+  const tagS=t.partial?`<span class="tag tag-partial">Em andamento</span>`:'';
+  const due=t.due?`<span class="task-due" style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px">${fmtDate(t.due)}</span>`:'';
+  return `<div class="task-item ${t.done?'done':''}">
+    <div class="task-check ${t.done?'checked':''}" onclick="toggleDone(${t.id})"></div>
+    <div class="task-info">
+      <div class="task-name">${esc(t.name)}</div>
+      <div class="task-meta">${tagP}${tagS}${due}</div>
+      ${t.nota?`<div class="task-nota">${esc(t.nota)}</div>`:''}
+    </div>
+    <div style="display:flex;gap:6px;flex-shrink:0">
+      ${!t.done?`<button class="btn btn-ghost btn-sm" onclick="setPartial(${t.id})">${t.partial?'desfazer':'em andamento'}</button>`:''}
+      <button class="btn btn-danger" onclick="deleteTask(${t.id})">✕</button>
+    </div>
+  </div>`;
+}
+
+// ==================== AGENDA ====================
+function getWeekDates(){
+  const today=new Date();today.setHours(12,0,0,0);
+  return Array.from({length:7},(_,i)=>{const d=new Date(today);d.setDate(today.getDate()+i);return d.toISOString().split('T')[0]});
+}
+
+async function gerarSemana(){
+  const dates=getWeekDates();
+  const pending=tasks.filter(t=>!t.done);
+  if(!pending.length){toast('Adicione tarefas primeiro.','accent');return;}
+  const taskList=pending.map(t=>`- "${t.name}" prioridade:${t.priority}${t.due?' prazo:'+t.due:''}`).join('\n');
+  const daysStr=dates.map(d=>new Date(d+'T12:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})).join(', ');
+  toast('Gerando plano da semana...','accent');
+  const prompt=`Você é assistente especializado em TDAH para estudante de Engenharia Civil.
+Hoje: ${dates[0]}. Próximos 7 dias: ${daysStr}.
+Tarefas pendentes:\n${taskList}
+
+Distribua as tarefas ao longo dos 7 dias de forma realista. Regras CRÍTICAS:
+- NUNCA coloque tudo no mesmo dia — distribua bem
+- Máximo 2-3 blocos de trabalho por dia (25-40 min cada)
+- Tarefas urgentes vão nos primeiros dias
+- Tarefas grandes: só o primeiro passo concreto por dia
+- Deixe pelo menos 1 dia mais leve para respirar
+
+Retorne APENAS JSON válido sem markdown:
+{"dias":[{"data":"YYYY-MM-DD","plano":"HH:MM — tarefa (X min)\nHH:MM — tarefa (X min)","carga":"leve|moderada|intensa"}],"observacao":"1 frase sobre como você distribuiu"}`;
+  try{
+    const res=await callGemini(prompt);
+    const json=safeJSON(res);
+    if(!json||!json.dias)throw new Error();
+    json.dias.forEach(d=>{
+      let day=agenda.find(x=>x.date===d.data);
+      if(!day){day={date:d.data,plan:'',reality:'',aiInsight:'',future:d.data!==dates[0]};agenda.push(day);}
+      day.plan=d.plano;day.carga=d.carga;day.future=d.data!==dates[0];
+    });
+    agenda.sort((a,b)=>b.date.localeCompare(a.date));
+    save('agenda',agenda);renderAgenda();
+    toast(json.observacao||'Semana planejada.','green');
+  }catch(e){toast('Erro ao gerar semana.','red');}
+}
+
+async function gerarAgendaHoje(){
+  const today=todayStr();
+  let day=agenda.find(d=>d.date===today);
+  if(!day){day={date:today,plan:'',reality:'',aiInsight:'',future:false};agenda.unshift(day);}
+  day.plan='Gerando...';save('agenda',agenda);renderAgenda();
+  const pending=tasks.filter(t=>!t.done).map(t=>`- "${t.name}" (${t.priority}${t.due?' prazo:'+t.due:''})`).join('\n')||'Nenhuma.';
+  const weekDay=new Date().toLocaleDateString('pt-BR',{weekday:'long'});
+  const prompt=`Assistente TDAH. Hoje é ${weekDay}, ${today}.
+Tarefas pendentes:\n${pending}
+Monte plano REALISTA só para hoje. Máximo 3 blocos de 25-40 min. Para tarefas grandes, só o primeiro passo concreto.
+Formato: HH:MM — tarefa (X min). Só o plano, sem explicações.`;
+  try{
+    const res=await callGemini(prompt);
+    day.plan=res;day.future=false;
+    save('agenda',agenda);renderAgenda();autoUpdateDiary();
+    atualizarEsboco();
+  }catch(e){day.plan='Erro ao gerar.';save('agenda',agenda);renderAgenda();}
+}
+
+async function atualizarEsboco(){
+  const dates=getWeekDates().slice(1);
+  const pending=tasks.filter(t=>!t.done);
+  if(!pending.length||!dates.length)return;
+  const taskList=pending.map(t=>`- "${t.name}" prioridade:${t.priority}${t.due?' prazo:'+t.due:''}`).join('\n');
+  const prompt=`Estudante TDAH. Hoje (${todayStr()}) já tem plano. Distribua o restante das tarefas nos próximos dias de forma leve e realista.
+Tarefas:\n${taskList}
+Próximos dias: ${dates.join(', ')}
+Retorne APENAS JSON sem markdown: {"dias":[{"data":"YYYY-MM-DD","plano":"esboço breve 1-2 linhas","carga":"leve|moderada|intensa"}]}
+Distribua bem, não sobrecarregue nenhum dia.`;
+  try{
+    const res=await callGemini(prompt);
+    const json=safeJSON(res);
+    if(!json||!json.dias)return;
+    json.dias.forEach(d=>{
+      let day=agenda.find(x=>x.date===d.data);
+      if(!day){day={date:d.data,plan:'',reality:'',aiInsight:'',future:true};agenda.push(day);}
+      if(day.future||!day.plan){day.plan=d.plano;day.carga=d.carga;day.future=true;}
+    });
+    agenda.sort((a,b)=>b.date.localeCompare(a.date));
+    save('agenda',agenda);renderAgenda();
+  }catch(e){}
+}
+
+async function saveReality(date,val){
+  const day=agenda.find(d=>d.date===date);if(!day)return;
+  day.reality=val;save('agenda',agenda);
+  if(val.length>10&&day.plan){
+    const prompt=`Analise o dia de alguém com TDAH em 2-3 frases.
+Plano: ${day.plan}
+O que aconteceu: ${val}
+Foque em padrões, sem julgamento. O que isso revela sobre como ele funciona?`;
+    try{
+      const ins=await callGemini(prompt);
+      day.aiInsight=ins;save('agenda',agenda);renderAgenda();autoUpdateDiary();
+    }catch(e){}
+  }
+}
+
+function renderAgenda(){
+  renderWeekGrid();
+  const el=document.getElementById('agenda-list');
+  const today=todayStr();
+  const relevant=agenda.filter(d=>{
+    const diff=(new Date(d.date+'T12:00')-new Date(today+'T12:00'))/(864e5);
+    return diff>=-3&&diff<=7;
+  }).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!relevant.length){el.innerHTML='<div class="empty">Clique em "Gerar plano da semana" para começar.</div>';return;}
+  el.innerHTML=relevant.map(day=>{
+    const isFuture=day.future&&day.date!==today;
+    const isPast=day.date<today;
+    const isToday=day.date===today;
+    const dStr=fmtDateLong(day.date);
+    return `<div class="day-block">
+      <div class="day-header" onclick="this.nextElementSibling.classList.toggle('open')">
+        <span class="day-date-label">${dStr}${isToday?' — Hoje':''}</span>
+        <span class="day-badge">${isFuture?'Esboço':isPast?'Passado':'Planejado'}${day.carga?' · '+day.carga:''}</span>
+      </div>
+      <div class="day-body ${isToday?'open':''}">
+        <div class="day-cols">
+          <div>
+            <div class="day-col-label">${isFuture?'Esboço':'Plano'}</div>
+            <div class="day-plan-text">${esc(day.plan||'Sem plano.')}</div>
+          </div>
+          ${!isFuture?`<div>
+            <div class="day-col-label">O que aconteceu</div>
+            <textarea style="min-height:110px;font-size:13px" placeholder="O que realmente aconteceu..." onblur="saveReality('${day.date}',this.value)">${esc(day.reality||'')}</textarea>
+          </div>`:`<div><div class="day-col-label">Distribuição prévia</div><div class="future-badge">Esboço preliminar. Atualizado quando você gerar o plano do dia.</div></div>`}
         </div>
-    `).join('');
+        ${day.aiInsight?`<div class="ai-insight">${esc(day.aiInsight)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function toggleTask(id) {
-    const t = tasks.find(x => x.id === id);
-    if(t) t.done = !t.done;
-    saveTasks();
-    renderTasks();
+function renderWeekGrid(){
+  const grid=document.getElementById('week-grid');
+  const today=todayStr();
+  grid.innerHTML=getWeekDates().map(d=>{
+    const da=agenda.find(a=>a.date===d);
+    const dow=new Date(d+'T12:00').toLocaleDateString('pt-BR',{weekday:'short'});
+    const num=new Date(d+'T12:00').getDate();
+    const preview=da?.plan?da.plan.split('\n').slice(0,2).map(l=>l.substring(0,28)).join('<br>'):'';
+    return `<div class="week-day${d===today?' today':''}${da?.plan?' has-plan':''}" onclick="">
+      <div class="week-day-label">${dow}</div>
+      <div class="week-day-date">${num}</div>
+      <div class="week-day-tasks">${preview}</div>
+    </div>`;
+  }).join('');
 }
 
-function deleteTask(id) {
-    tasks = tasks.filter(t => t.id !== id);
-    saveTasks();
-    renderTasks();
+// ==================== PAUSAS - DAY CHAT ====================
+// reset daily chat if new day
+function checkDayChatReset(){
+  const lastDay=localStorage.getItem('dayChat_date');
+  if(lastDay!==todayStr()){
+    dayChat=[];save('dayChat',dayChat);
+    localStorage.setItem('dayChat_date',todayStr());
+  }
 }
 
-function saveTasks() { localStorage.setItem('foco_tasks', JSON.stringify(tasks)); }
-
-function showPage(name, el) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('page-' + name).classList.add('active');
-    el.classList.add('active');
+function chatDayKeydown(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendDayChat();}
 }
 
-function showToast(msg, color) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.display = 'block';
-    t.style.backgroundColor = '#1A1A1A';
-    t.style.borderLeft = `4px solid var(--${color})`;
-    setTimeout(() => t.style.display = 'none', 3000);
+async function sendDayChat(){
+  const input=document.getElementById('chat-day-input');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  document.getElementById('chat-day-btn').disabled=true;
+
+  const time=nowTime();
+  dayChat.push({role:'user',text,time});
+  save('dayChat',dayChat);
+  renderDayChat();
+
+  const doneCt=tasks.filter(t=>t.done).length;
+  const pending=tasks.filter(t=>!t.done).slice(0,5).map(t=>t.name).join(', ')||'nenhuma';
+  const history=dayChat.slice(-6).map(m=>`${m.role==='user'?'Usuário':'Assistente'}: ${m.text}`).join('\n');
+
+  const prompt=`Você é assistente de produtividade para alguém com TDAH, estudante de Engenharia Civil no fim do curso.
+Contexto do dia: ${doneCt} tarefas concluídas hoje. Pendentes prioritárias: ${pending}.
+
+Conversa do dia até agora:
+${history}
+
+A última mensagem do usuário foi: "${text}"
+
+Responda de forma útil e contextual. Pode ser:
+- Sugestão de pausa específica (quanto tempo, o que fazer)
+- Recompensa merecida com tempo sugerido (ex: "você merece 45 minutos de série agora")
+- Próximo passo concreto se ele travou
+- Validação se ele estiver se sentindo mal
+- Folga total se o contexto mostrar que foi um dia sólido
+
+Seja direto, humano, sem clichê. Máximo 4 frases.
+Se for sugerir recompensa, termine com: RECOMPENSA:[descrição breve com tempo]`;
+
+  try{
+    const res=await callGemini(prompt);
+    const isReward=res.includes('RECOMPENSA:');
+    const cleanRes=res.replace(/RECOMPENSA:.*$/,'').trim();
+    const rewardText=isReward?res.match(/RECOMPENSA:(.*)/)?.[1]?.trim():'';
+
+    dayChat.push({role:'ai',text:cleanRes,time:nowTime()});
+    if(rewardText){
+      dayChat.push({role:'reward',text:rewardText,time:nowTime()});
+      pausasLog.unshift({type:'reward',text:rewardText,date:todayStr(),time:nowTime()});
+      save('pausasLog',pausasLog);
+    }
+    save('dayChat',dayChat);
+    renderDayChat();
+    autoUpdateDiary();
+  }catch(e){
+    dayChat.push({role:'ai',text:'Não consegui responder agora. Tente novamente.',time:nowTime()});
+    save('dayChat',dayChat);renderDayChat();
+  }
+  document.getElementById('chat-day-btn').disabled=false;
 }
+
+function renderDayChat(){
+  const el=document.getElementById('day-chat');
+  if(!dayChat.length){
+    el.innerHTML='<div style="color:var(--text-muted);font-size:13px;padding:8px 0">Conte como o dia está indo. Pode ser qualquer coisa.</div>';
+    return;
+  }
+  el.innerHTML=dayChat.map(m=>`
+    <div class="chat-msg ${m.role}">
+      ${esc(m.text)}
+      <div class="msg-time">${m.time}</div>
+    </div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+async function modoHonesto(){
+  const el=document.getElementById('honest-response-area');
+  el.innerHTML='<div class="loading">Pensando no próximo passo...</div>';
+  pausasLog.unshift({type:'honest',text:'modo honesto ativado',date:todayStr(),time:nowTime()});
+  save('pausasLog',pausasLog);
+
+  const pending=tasks.filter(t=>!t.done).slice(0,5).map(t=>t.name).join(', ')||'nenhuma cadastrada';
+  const prompt=`Alguém com TDAH reconheceu que está usando recompensa sem ter feito nada. Sem julgamento algum.
+Tarefas pendentes: ${pending}
+
+Responda:
+1. Uma frase de acolhimento genuíno (não minimize, não elogie demais)
+2. A menor tarefa possível para quebrar o ciclo agora — algo de 5 minutos máximo, ultra concreto e específico
+3. Por que esse pequeno passo importa (1 frase curta)
+
+Seja humano e direto. Máximo 4 frases no total.`;
+
+  try{
+    const res=await callGemini(prompt);
+    el.innerHTML=`
+      <div class="honest-response-box">${esc(res)}</div>
+      <div class="honest-correction">
+        <input id="honest-fix-input" placeholder="A IA entendeu algo errado? Corrija aqui..." onkeydown="if(event.key==='Enter')corrigirHonesto()">
+        <button class="btn btn-ghost btn-sm" onclick="corrigirHonesto()">Corrigir</button>
+      </div>`;
+    renderPausasHistory();
+  }catch(e){
+    el.innerHTML=`<div class="honest-response-box">Tudo bem. Tente só abrir o material por 2 minutos — sem compromisso de ficar.
+      <div class="honest-correction" style="margin-top:10px">
+        <input id="honest-fix-input" placeholder="Corrija aqui se precisar..." onkeydown="if(event.key==='Enter')corrigirHonesto()">
+        <button class="btn btn-ghost btn-sm" onclick="corrigirHonesto()">Corrigir</button>
+      </div>
+    </div>`;
+  }
+}
+
+async function corrigirHonesto(){
+  const fix=document.getElementById('honest-fix-input')?.value.trim();
+  if(!fix)return;
+  const el=document.getElementById('honest-response-area');
+  el.innerHTML='<div class="loading">Reformulando...</div>';
+
+  const pending=tasks.filter(t=>!t.done).slice(0,5).map(t=>t.name).join(', ')||'nenhuma';
+  const prompt=`Alguém com TDAH está no modo honesto (usando recompensa sem ter feito nada).
+Tarefas pendentes: ${pending}
+Correção ou contexto que o usuário deu: "${fix}"
+
+Com essa informação corrigida, sugira:
+1. Acolhimento breve
+2. O menor passo possível agora (ultra concreto, 5 min máximo)
+3. Por que esse passo importa
+
+Máximo 4 frases. Sem julgamento.`;
+
+  try{
+    const res=await callGemini(prompt);
+    el.innerHTML=`
+      <div class="honest-response-box">${esc(res)}</div>
+      <div class="honest-correction">
+        <input id="honest-fix-input" placeholder="Ainda não está certo? Corrija novamente..." onkeydown="if(event.key==='Enter')corrigirHonesto()">
+        <button class="btn btn-ghost btn-sm" onclick="corrigirHonesto()">Corrigir</button>
+      </div>`;
+  }catch(e){el.innerHTML='<div class="loading">Erro. Tente novamente.</div>';}
+}
+
+function renderPausasHistory(){
+  const el=document.getElementById('pausas-history');
+  const todayLog=pausasLog.filter(h=>h.date===todayStr());
+  if(!todayLog.length){
+    el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:8px 0">Nenhum registro hoje.</div>';
+    return;
+  }
+  el.innerHTML=todayLog.map(h=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px">
+      <span style="font-size:16px">${h.type==='reward'?'🎯':h.type==='honest'?'🤍':'◌'}</span>
+      <span style="flex:1;color:var(--text-soft)">${esc(h.text)}</span>
+      <span style="color:var(--text-muted);font-size:11px;font-family:'JetBrains Mono',monospace">${h.time}</span>
+      <span style="font-size:10px;padding:2px 7px;border-radius:3px;${h.type==='reward'?'background:var(--purple-dim);color:var(--purple)':'background:var(--surface2);color:var(--text-muted)'}">${h.type==='reward'?'recompensa':'honesto'}</span>
+    </div>`).join('');
+}
+
+function renderPausas(){
+  checkDayChatReset();
+  renderDayChat();
+  renderPausasHistory();
+}
+
+// ==================== PROGRESS ====================
+function renderProgresso(){
+  const total=tasks.length,done=tasks.filter(t=>t.done).length,partial=tasks.filter(t=>t.partial).length;
+  const pct=total?Math.round((done+partial*0.5)/total*100):0;
+  document.getElementById('progress-overview').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px">
+      <div>
+        <div style="font-size:32px;font-weight:600;letter-spacing:-1px">${pct}<span style="font-size:16px;color:var(--text-muted)">%</span></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${done} concluídas · ${partial} em andamento · ${total-done-partial} pendentes</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="analisarProgresso()">Análise da IA</button>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+    <div id="progress-ai" style="margin-top:12px"></div>`;
+  const cl=document.getElementById('checklist-list');
+  if(!tasks.length){cl.innerHTML='<div class="empty">Nenhuma tarefa.</div>';return;}
+  cl.innerHTML=tasks.map(t=>{
+    let sc='status-pending',ch='';
+    if(t.done){sc='status-done';ch='✓';}else if(t.partial){sc='status-partial';ch='~';}
+    return `<div class="checklist-item">
+      <div class="check-status ${sc}" onclick="cycleStatus(${t.id})">${ch}</div>
+      <div style="flex:1"><div style="font-size:13px;${t.done?'text-decoration:line-through;opacity:.5':''}">${esc(t.name)}</div>${t.due?`<div style="font-size:11px;color:var(--accent);margin-top:2px;font-family:'JetBrains Mono',monospace">${fmtDate(t.due)}</div>`:''}</div>
+      <span class="tag tag-${t.priority}">${t.priority==='alta'?'Urgente':t.priority==='baixa'?'Baixa':'Normal'}</span>
+    </div>`;
+  }).join('');
+}
+
+function cycleStatus(id){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  if(!t.done&&!t.partial){t.partial=true;}
+  else if(t.partial){t.done=true;t.partial=false;}
+  else{t.done=false;t.partial=false;}
+  save('tasks',tasks);renderProgresso();autoUpdateDiary();
+}
+
+async function analisarProgresso(){
+  const el=document.getElementById('progress-ai');if(!el)return;
+  el.innerHTML='<span class="loading">Analisando...</span>';
+  const done=tasks.filter(t=>t.done),partial=tasks.filter(t=>t.partial),pend=tasks.filter(t=>!t.done&&!t.partial);
+  const prompt=`Analise o progresso de um estudante de Engenharia Civil com TDAH (3-4 frases).
+Concluídas: ${done.map(t=>t.name).join(', ')||'nenhuma'}
+Em andamento: ${partial.map(t=>t.name).join(', ')||'nenhuma'}
+Urgentes pendentes: ${pend.filter(t=>t.priority==='alta').map(t=>t.name).join(', ')||'nenhuma'}
+Aponte o que está indo bem e o próximo passo mais importante.`;
+  try{const res=await callGemini(prompt);el.innerHTML=`<div class="ai-insight">${esc(res)}</div>`;}
+  catch(e){el.innerHTML='';}
+}
+
+// ==================== DIARY ====================
+async function autoUpdateDiary(){
+  const today=todayStr();
+  const da=agenda.find(d=>d.date===today);
+  const doneCt=tasks.filter(t=>t.done).length,partialCt=tasks.filter(t=>t.partial).length;
+  const chatSummary=dayChat.filter(m=>m.role==='user').map(m=>m.text).join(' / ')||'sem registros';
+  const prompt=`Gere entrada para diário evolutivo de alguém com TDAH (3-4 frases).
+Hoje: ${today}. Plano: ${da?.plan||'não gerado'}. O que aconteceu: ${da?.reality||'não registrado'}.
+Registros do dia: ${chatSummary}.
+Tarefas concluídas: ${doneCt}, em andamento: ${partialCt}.
+Foco em padrões de comportamento e evolução, sem julgamento.
+No final: FOCO:N (1-10 baseado nos dados)`;
+  try{
+    const res=await callGemini(prompt);
+    const m=res.match(/FOCO:(\d+)/);
+    const focusScore=m?parseInt(m[1]):5;
+    const text=res.replace(/FOCO:\d+/,'').trim();
+    let entry=diary.find(d=>d.date===today);
+    if(entry){entry.text=text;entry.focusScore=focusScore;}
+    else{diary.unshift({date:today,text,focusScore});}
+    save('diary',diary);
+    if(document.getElementById('page-diario').classList.contains('active'))renderDiario();
+  }catch(e){}
+}
+
+function renderDiario(){
+  document.getElementById('diary-list').innerHTML=diary.length?
+    diary.slice(0,30).map(d=>`<div class="diary-entry">
+      <div class="diary-date">${fmtDateLong(d.date)}</div>
+      <div class="diary-text">${esc(d.text)}</div>
+      <div style="margin-top:10px"><span class="score-pill score-focus">Foco ${d.focusScore}/10</span></div>
+    </div>`).join(''):
+    '<div class="empty">O diário é preenchido automaticamente conforme você usa o app.</div>';
+  renderChart();
+}
+
+function renderChart(){
+  const canvas=document.getElementById('evolucao-chart');if(!canvas)return;
+  const data=[...diary].reverse().slice(-14);if(!data.length)return;
+  if(window._chart)window._chart.destroy();
+  window._chart=new Chart(canvas,{type:'line',data:{labels:data.map(d=>fmtDate(d.date)),datasets:[{label:'Foco',data:data.map(d=>d.focusScore||5),borderColor:'#C8B47A',backgroundColor:'rgba(200,180,122,0.08)',borderWidth:2,pointBackgroundColor:'#C8B47A',pointRadius:4,tension:.3,fill:true}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#2E2E2E'},ticks:{color:'#555',font:{size:11}}},y:{min:0,max:10,grid:{color:'#2E2E2E'},ticks:{color:'#555',font:{size:11}}}}}});
+}
+
+// ==================== ROUTINE ====================
+async function renderRotina(){
+  const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const tbody=document.getElementById('rotina-body');
+  const weekData={};
+  agenda.slice(0,14).forEach(d=>{
+    const dow=new Date(d.date+'T12:00').getDay();
+    const name=days[dow];
+    if(!weekData[name])weekData[name]={done:0,planned:0,reality:d.reality||''};
+    weekData[name].planned+=(d.plan||'').split('\n').filter(l=>l.trim()).length;
+    if(d.reality)weekData[name].done++;
+  });
+  if(!Object.keys(weekData).length){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Registre alguns dias na agenda.</td></tr>';
+    return;
+  }
+  tbody.innerHTML=Object.entries(weekData).map(([day,data])=>{
+    const f=diary.find(d=>new Date(d.date+'T12:00').getDay()===days.indexOf(day));
+    const foco=f?.focusScore;
+    const cls=typeof foco==='number'?(foco>=7?'cell-high':foco>=4?'cell-mid':'cell-low'):'';
+    return `<tr><td style="font-weight:500;color:var(--text)">${day}</td><td class="${data.done?'cell-high':''}">${data.done}/${data.planned}</td><td class="${cls}">${typeof foco==='number'?foco+'/10':'—'}</td><td style="font-size:12px">${esc((data.reality||'—').substring(0,60))}</td></tr>`;
+  }).join('');
+
+  if(agenda.length>=3){
+    const insEl=document.getElementById('rotina-insight');
+    insEl.innerHTML='<span class="loading">Analisando padrões...</span>';
+    const summary=agenda.slice(0,7).map(d=>`${d.date}: plano="${(d.plan||'').substring(0,60)}" real="${(d.reality||'').substring(0,60)}"`).join('\n');
+    const prompt=`Analise padrões de trabalho de estudante com TDAH em 3-4 frases.
+${summary}
+Identifique quando rende mais, o que interrompe o fluxo, e um padrão concreto observado.`;
+    try{
+      const res=await callGemini(prompt);
+      insEl.innerHTML=`<p style="font-size:13px;color:var(--text-soft);line-height:1.7">${esc(res)}</p>`;
+    }catch(e){insEl.textContent='Não foi possível analisar ainda.';}
+  }
+}
+
+// ==================== WEEKS ====================
+async function fecharSemana(){
+  const done=tasks.filter(t=>t.done),pending=tasks.filter(t=>!t.done);
+  const prompt=`Resumo semanal (5-7 frases) de estudante de Engenharia Civil com TDAH.
+Concluídas: ${done.map(t=>t.name).join(', ')||'nenhuma'}
+Pendentes: ${pending.map(t=>t.name).join(', ')||'nenhuma'}
+Dias registrados: ${agenda.slice(0,7).length}
+Pontuações de foco: ${diary.slice(0,7).map(d=>d.focusScore).join(', ')||'sem dados'}
+Foque em avanços, padrões de procrastinação, evolução real. Termine com "Próxima semana: [1 prioridade concreta]".`;
+  try{
+    const aiSummary=await callGemini(prompt);
+    const s={id:Date.now(),label:`Semana ${weekNum}`,weekNum,startDate:agenda.length?agenda[agenda.length-1].date:todayStr(),endDate:todayStr(),aiSummary,data:{tasks:[...tasks],agenda:[...agenda.slice(0,7)],diary:[...diary.slice(0,7)]}};
+    semanas.unshift(s);weekNum++;
+    save('semanas',semanas);save('weekNum',weekNum);
+    renderSemanas();toast('Semana fechada.','green');
+  }catch(e){toast('Erro ao fechar semana.','red');}
+}
+
+function renderSemanas(){
+  const el=document.getElementById('semanas-list');
+  el.innerHTML=semanas.length?semanas.map(s=>`<div class="week-item">
+    <div class="week-info">
+      <div class="week-label">${esc(s.label)}</div>
+      <div class="week-meta">${fmtDate(s.startDate)} → ${fmtDate(s.endDate)} · ${s.data.tasks.filter(t=>t.done).length} concluídas</div>
+    </div>
+    <div class="week-actions">
+      <button class="btn btn-ghost btn-sm" onclick="downloadSemanaAI(${s.id})">Análise</button>
+      <button class="btn btn-ghost btn-sm" onclick="downloadSemanaJSON(${s.id})">Exportar</button>
+    </div>
+  </div>`).join(''):'<div class="empty">Nenhuma semana fechada ainda.</div>';
+  populateCompare();
+}
+
+function downloadSemanaAI(id){const s=semanas.find(x=>x.id===id);if(!s)return;download(`${s.label.replace(' ','-')}-analise.txt`,`${s.label}\n${fmtDate(s.startDate)} a ${fmtDate(s.endDate)}\n${'─'.repeat(40)}\n\n${s.aiSummary}`);}
+function downloadSemanaJSON(id){const s=semanas.find(x=>x.id===id);if(!s)return;download(`${s.label.replace(' ','-')}-dados.json`,JSON.stringify(s,null,2));}
+
+function importarSemana(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.tasks)tasks=[...d.tasks,...tasks.filter(t=>!d.tasks.find(x=>x.id===t.id))];
+      if(d.agenda)agenda=[...d.agenda,...agenda.filter(x=>!d.agenda.find(y=>y.date===x.date))];
+      if(d.diary)diary=[...d.diary,...diary.filter(x=>!d.diary.find(y=>y.date===x.date))];
+      save('tasks',tasks);save('agenda',agenda);save('diary',diary);
+      toast('Importado com sucesso.','green');renderSemanas();
+    }catch(err){toast('Arquivo inválido.','red');}
+  };
+  r.readAsText(file);
+}
+
+function populateCompare(){
+  const opts=semanas.map(s=>`<option value="${s.id}">${s.label}</option>`).join('');
+  document.getElementById('compare-a').innerHTML=opts;
+  document.getElementById('compare-b').innerHTML=opts;
+  if(semanas.length>1)document.getElementById('compare-b').selectedIndex=1;
+}
+
+function showCompareModal(){
+  if(semanas.length<2){toast('Precisa de pelo menos 2 semanas.','accent');return;}
+  populateCompare();
+  document.getElementById('compare-modal').classList.add('open');
+}
+
+async function compararSemanas(){
+  const idA=parseInt(document.getElementById('compare-a').value);
+  const idB=parseInt(document.getElementById('compare-b').value);
+  const sA=semanas.find(x=>x.id===idA),sB=semanas.find(x=>x.id===idB);
+  if(!sA||!sB||idA===idB){toast('Selecione duas semanas diferentes.','red');return;}
+  const el=document.getElementById('compare-result');
+  el.innerHTML='<span class="loading">Comparando...</span>';
+  const prompt=`Compare duas semanas de estudante com TDAH (5-6 frases).
+${sA.label}: ${sA.aiSummary}
+${sB.label}: ${sB.aiSummary}
+Identifique o que melhorou, o que piorou e padrões persistentes de procrastinação.`;
+  try{
+    const res=await callGemini(prompt);
+    el.innerHTML=`<div class="ai-insight" style="margin-top:0">${esc(res)}</div>`;
+  }catch(e){el.innerHTML='<span style="color:var(--red);font-size:13px">Erro ao comparar.</span>';}
+}
+
+// ==================== CRISIS ====================
+function openCrisis(){document.getElementById('crisis-overlay').classList.add('open');document.getElementById('crisis-input').focus();}
+function closeCrisis(){document.getElementById('crisis-overlay').classList.remove('open');document.getElementById('crisis-response-area').innerHTML='';}
+async function processCrisis(){
+  const text=document.getElementById('crisis-input').value.trim();if(!text)return;
+  const el=document.getElementById('crisis-response-area');
+  el.innerHTML='<span class="loading">Reorganizando...</span>';
+  const urgent=tasks.filter(t=>!t.done&&t.priority==='alta').map(t=>t.name).join(', ')||'nenhuma urgente';
+  const prompt=`Estudante com TDAH em crise: "${text}". Urgentes: ${urgent}.
+Responda: 1 frase de acolhimento, 1 próximo passo de 5 min máximo, 1 coisa que pode deixar para depois sem culpa. Humano, direto. Máximo 4 frases.`;
+  try{
+    const res=await callGemini(prompt);
+    el.innerHTML=`<div class="crisis-response-box">${esc(res)}</div>`;
+  }catch(e){el.innerHTML='<div class="crisis-response-box">Tudo bem. Só abra o material por 2 minutos — sem compromisso de ficar.</div>';}
+}
+
+// ==================== MODAL ====================
+function showModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ==================== RENDER MAP ====================
+const renders={
+  tarefas:renderTarefas,
+  agenda:renderAgenda,
+  pausas:renderPausas,
+  progresso:renderProgresso,
+  diario:renderDiario,
+  rotina:renderRotina,
+  semanas:renderSemanas
+};
+
+// ==================== INIT ====================
+checkDayChatReset();
+renderTarefas();
 </script>
 </body>
 </html>
