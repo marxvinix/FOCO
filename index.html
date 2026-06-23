@@ -507,53 +507,41 @@ function resetApiKey(){
 }
 
 // ==================== GEMINI API ====================
-async function callGemini(prompt, key){
-  const k=key||apiKey;
-  if(!k) throw new Error('sem chave');
+async function callGemini(prompt, key) {
+  const k = key || apiKey;
+  if (!k) throw new Error('sem chave');
 
-  // discover available models on first call
-  if(!window._geminiModel){
-    try{
-      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${k}`);
-      const d=await r.json();
-      const available=(d.models||[])
-        .filter(m=>m.supportedGenerationMethods?.includes('generateContent'))
-        .map(m=>m.name.replace('models/',''));
-      console.log('Available Gemini models:', available);
-      // prefer flash models in order
-      const preferred=['gemini-3.5-flash','gemini-2.5-flash','gemini-2.0-flash','gemini-3.1-flash-lite','gemini-2.0-flash-lite'];
-      window._geminiModel = preferred.find(p=>available.includes(p)) || available.find(m=>m.includes('flash')) || available[0];
-      console.log('Selected model:', window._geminiModel);
-    }catch(e){
-      window._geminiModel='gemini-2.0-flash';
+  if (!window._geminiModel) {
+    try {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${k}`);
+      const d = await r.json();
+      const available = (d.models || []).map(m => m.name.replace('models/', ''));
+      
+      // Lista de modelos que realmente existem hoje
+      const preferred = ['gemini-1.5-flash', 'gemini-2.0-flash-exp', 'gemini-1.5-pro'];
+      window._geminiModel = preferred.find(p => available.includes(p)) || 'gemini-1.5-flash';
+    } catch (e) {
+      window._geminiModel = 'gemini-1.5-flash';
     }
   }
 
-  const model=window._geminiModel;
-  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${k}`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      contents:[{role:'user',parts:[{text:prompt}]}],
-      generationConfig:{temperature:0.4,maxOutputTokens:1500},
-      safetySettings:[
-        {category:'HARM_CATEGORY_HARASSMENT',threshold:'BLOCK_NONE'},
-        {category:'HARM_CATEGORY_HATE_SPEECH',threshold:'BLOCK_NONE'},
-        {category:'HARM_CATEGORY_SEXUALLY_EXPLICIT',threshold:'BLOCK_NONE'},
-        {category:'HARM_CATEGORY_DANGEROUS_CONTENT',threshold:'BLOCK_NONE'}
-      ]
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${window._geminiModel}:generateContent?key=${k}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 1500 }
     })
   });
-  const data=await res.json();
-  console.log(`Gemini [${model}] status:`, res.status, JSON.stringify(data).substring(0,300));
-  if(!res.ok){
-    const msg=data?.error?.message||'erro';
-    if(res.status===429) throw new Error('Cota excedida. Crie uma nova chave em aistudio.google.com → Get API Key.');
-    if(res.status===404){ window._geminiModel=null; throw new Error('Modelo não encontrado. Tente novamente.'); }
-    throw new Error(`${res.status}: ${msg}`);
+
+  const data = await res.json();
+  if (!res.ok) {
+    if (res.status === 404) { window._geminiModel = null; throw new Error('Modelo não encontrado. Tente novamente.'); }
+    throw new Error(data?.error?.message || 'Erro na API');
   }
-  const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-  if(!text) throw new Error('Resposta vazia. finishReason: '+(data.candidates?.[0]?.finishReason||'?'));
+
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  if (!text) throw new Error('Resposta da IA vazia.');
   return text;
 }
 
